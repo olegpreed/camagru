@@ -1,0 +1,26 @@
+# Environment variables
+.env
+
+# Vendor directory (if using Composer later)
+/vendor/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploaded files (we'll create this later)
+/public/uploads/
+/public/superposables/
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml
