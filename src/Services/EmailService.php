@@ -50,6 +50,27 @@ class EmailService
     }
 
     /**
+     * Send password reset email
+     *
+     * @param string $toEmail
+     * @param string $username
+     * @param string $resetToken
+     * @return bool
+     */
+    public function sendPasswordResetEmail(string $toEmail, string $username, string $resetToken): bool
+    {
+        error_log("sendPasswordResetEmail called for {$toEmail}");
+
+        $appUrl = getenv('APP_URL') ?: 'http://localhost:8080';
+        $resetLink = $appUrl . '/user/reset-password?token=' . urlencode($resetToken);
+
+        $subject = "Reset your Camagru password";
+        $message = $this->getPasswordResetEmailTemplate($username, $resetLink);
+
+        return $this->sendEmail($toEmail, $subject, $message);
+    }
+
+    /**
      * High-level send method with dev/prod behavior
      *
      * @param string $to
@@ -251,6 +272,45 @@ class EmailService
                 <p>Or copy and paste this link into your browser:</p>
                 <p><a href='{$verificationLink}'>{$verificationLink}</a></p>
                 <p>If you didn't create an account, please ignore this email.</p>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+
+    /**
+     * Get password reset email HTML template
+     *
+     * @param string $username
+     * @param string $resetLink
+     * @return string
+     */
+    private function getPasswordResetEmailTemplate(string $username, string $resetLink): string
+    {
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .button { display: inline-block; padding: 12px 24px; background: #2c3e50; color: white; text-decoration: none; border-radius: 5px; }
+                .warning { color: #d9534f; font-size: 14px; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h1>Password Reset Request</h1>
+                <p>Hi {$username},</p>
+                <p>We received a request to reset your Camagru password. Click the button below to proceed:</p>
+                <p>
+                    <a href='{$resetLink}' class='button'>Reset Password</a>
+                </p>
+                <p>Or copy and paste this link into your browser:</p>
+                <p><a href='{$resetLink}'>{$resetLink}</a></p>
+                <p>This link will expire in 1 hour.</p>
+                <p class='warning'><strong>If you didn't request a password reset, please ignore this email or contact support if you think your account may be compromised.</strong></p>
             </div>
         </body>
         </html>

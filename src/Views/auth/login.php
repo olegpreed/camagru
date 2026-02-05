@@ -48,3 +48,5 @@
 <p style="margin-top: 1rem;">
     Don’t have an account? <a href="/auth/register">Register</a>
 </p>
+<p style="margin-top: 0.5rem;">
+	Forgot your password? <a href="/auth/forgot-password">Reset it</a>

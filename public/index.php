@@ -21,12 +21,20 @@ $router = new Router();
 $router->add('', ['controller' => 'Home', 'action' => 'index']);
 $router->add('/', ['controller' => 'Home', 'action' => 'index']);
 $router->add('home', ['controller' => 'Home', 'action' => 'index']);
+
 // Authentication routes
 $router->add('auth/register', ['controller' => 'Auth', 'action' => 'register']);
 $router->add('auth/register-post', ['controller' => 'Auth', 'action' => 'registerPost']);
+$router->add('auth/forgot-password', ['controller' => 'User', 'action' => 'forgotPassword']);
 $router->add('verify', ['controller' => 'Auth', 'action' => 'verify']);
 $router->add('auth/login', ['controller' => 'Auth', 'action' => 'login']);
 $router->add('auth/logout', ['controller' => 'Auth', 'action' => 'logout']);
+
+// User routes
+$router->add('user/profile', ['controller' => 'User', 'action' => 'profile']);
+$router->add('user/edit-profile', ['controller' => 'User', 'action' => 'editProfile']);
+$router->add('user/change-password', ['controller' => 'User', 'action' => 'changePassword']);
+$router->add('user/reset-password', ['controller' => 'User', 'action' => 'resetPassword']);
 
 // Get the URL path
 $url = $_SERVER['REQUEST_URI'] ?? '/';

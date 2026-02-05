@@ -180,4 +180,136 @@ class User extends Model
             'errors' => $errors
         ];
     }
+
+    /**
+     * Find user by ID
+     * 
+     * @param int $id
+     * @return array|null
+     */
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Find user by reset token
+     * 
+     * @param string $token
+     * @return array|null
+     */
+    public function findByResetToken(string $token): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM {$this->table} 
+             WHERE reset_token = :token 
+             AND reset_token_expires_at > NOW()"
+        );
+        $stmt->execute(['token' => $token]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Set password reset token
+     * 
+     * @param int $userId
+     * @param string $token
+     * @param string $expiresAt (format: 'Y-m-d H:i:s')
+     * @return bool
+     */
+    public function setResetToken(int $userId, string $token, string $expiresAt): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET reset_token = :token, reset_token_expires_at = :expires_at 
+                WHERE id = :id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'token' => $token,
+                'expires_at' => $expiresAt,
+                'id' => $userId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Failed to set reset token: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Clear password reset token
+     * 
+     * @param int $userId
+     * @return bool
+     */
+    public function clearResetToken(int $userId): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET reset_token = NULL, reset_token_expires_at = NULL 
+                WHERE id = :id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['id' => $userId]);
+        } catch (PDOException $e) {
+            error_log("Failed to clear reset token: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update user password
+     * 
+     * @param int $userId
+     * @param string $passwordHash
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $passwordHash): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET password_hash = :password_hash, updated_at = NOW() 
+                WHERE id = :id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'password_hash' => $passwordHash,
+                'id' => $userId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Failed to update password: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update user profile (username and email)
+     * 
+     * @param int $userId
+     * @param string $username
+     * @param string $email
+     * @return bool
+     */
+    public function updateProfile(int $userId, string $username, string $email): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET username = :username, email = :email, updated_at = NOW() 
+                WHERE id = :id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'username' => $username,
+                'email' => $email,
+                'id' => $userId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Failed to update profile: " . $e->getMessage());
+            return false;
+        }
+    }
 }
