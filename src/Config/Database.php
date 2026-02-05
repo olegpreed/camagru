@@ -27,24 +27,12 @@ class Database
     private static function loadConfig(): array
     {
         if (empty(self::$config)) {
-            // Load .env file if it exists
-            $envFile = __DIR__ . '/../../.env';
-            if (file_exists($envFile)) {
-                $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                foreach ($lines as $line) {
-                    if (strpos(trim($line), '#') === 0) {
-                        continue; // Skip comments
-                    }
-                    list($key, $value) = explode('=', $line, 2);
-                    $_ENV[trim($key)] = trim($value);
-                }
-            }
-
+            // Load config from environment (Docker Compose passes .env vars to container)
             self::$config = [
-                'host' => $_ENV['DB_HOST'] ?? 'db',
-                'dbname' => $_ENV['DB_NAME'] ?? 'camagru_db',
-                'username' => $_ENV['DB_USER'] ?? 'camagru_user',
-                'password' => $_ENV['DB_PASS'] ?? 'camagru_password',
+                'host' => getenv('DB_HOST') ?: 'db',
+                'dbname' => getenv('DB_NAME') ?: 'camagru_db',
+                'username' => getenv('DB_USER') ?: 'camagru_user',
+                'password' => getenv('DB_PASS') ?: 'camagru_password',
                 'charset' => 'utf8mb4',
             ];
         }

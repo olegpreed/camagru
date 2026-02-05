@@ -5,17 +5,14 @@
  * Converts namespace to file path
  */
 spl_autoload_register(function ($class) {
-    // Remove namespace prefix if present
-    $prefix = 'Config\\';
-    $baseDir = __DIR__ . '/';
+    // Base directory
+    $baseDir = __DIR__ . '/../';
     
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
+    // Remove leading backslash
+    $class = ltrim($class, '\\');
     
-    $relativeClass = substr($class, $len);
-    $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+    // Convert namespace to file path
+    $file = $baseDir . str_replace('\\', '/', $class) . '.php';
     
     if (file_exists($file)) {
         require $file;
