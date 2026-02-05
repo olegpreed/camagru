@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Core\Controller;
 use Core\View;
+use Middleware\AuthMiddleware;
 use Models\User;
 use Services\EmailService;
 
@@ -13,6 +14,97 @@ use Services\EmailService;
  */
 class AuthController extends Controller
 {
+    protected function before(): bool
+    {
+        $guestOnlyActions = ['login', 'register', 'registerPost', 'verify'];
+        $action = $this->routeParams['action'] ?? '';
+
+        if (in_array($action, $guestOnlyActions, true)) {
+            AuthMiddleware::requireGuest();
+        }
+
+        return true;
+    }
+
+    public function loginAction(): void
+    {
+        // If POST, process login
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $this->loginPostAction();
+            return;
+        }
+
+        \Core\View::render('auth/login', [
+            'title' => 'Login - Camagru',
+            'errors' => [],
+            'old' => []
+        ]);
+    }
+
+    public function loginPostAction(): void
+    {
+        $errors = [];
+        $old = $_POST ?? [];
+
+        $login = trim($_POST['login'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if ($login === '') {
+            $errors['login'] = 'Username or email is required';
+        }
+        if ($password === '') {
+            $errors['password'] = 'Password is required';
+        }
+
+        if (!empty($errors)) {
+            \Core\View::render('auth/login', [
+                'title' => 'Login - Camagru',
+                'errors' => $errors,
+                'old' => $old
+            ]);
+            return;
+        }
+
+        $userModel = new \Models\User();
+        $user = $userModel->findByLogin($login);
+
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            $errors['general'] = 'Invalid credentials';
+            \Core\View::render('auth/login', [
+                'title' => 'Login - Camagru',
+                'errors' => $errors,
+                'old' => ['login' => $login]
+            ]);
+            return;
+        }
+
+        if (!(int)$user['is_verified']) {
+            $errors['general'] = 'Please verify your email before logging in.';
+            \Core\View::render('auth/login', [
+                'title' => 'Login - Camagru',
+                'errors' => $errors,
+                'old' => ['login' => $login]
+            ]);
+            return;
+        }
+
+        // Store minimal user info in session (don’t store password_hash)
+        \Core\Session::set('user', [
+            'id' => (int)$user['id'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+        ]);
+
+        header('Location: /');
+        exit;
+    }
+
+    public function logoutAction(): void
+    {
+        \Core\Session::destroy();
+        header('Location: /');
+        exit;
+    }
     /**
      * Show registration form or process registration
      */

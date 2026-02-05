@@ -48,6 +48,20 @@
     </style>
 </head>
 <body>
+    <?php
+    use Middleware\AuthMiddleware;
+
+    $user = AuthMiddleware::user();
+    ?>
+    <div style="margin-top: 0.5rem; font-size: 0.95rem;">
+    <?php if ($user): ?>
+        Logged in as <strong><?= htmlspecialchars($user['username']) ?></strong>
+        - <a href="/auth/logout" style="color: #457aff; text-decoration: underline;">Logout</a>
+    <?php else: ?>
+        <a href="/auth/login" style="color: #457aff; text-decoration: underline;">Login</a>
+        | <a href="/auth/register" style="color: #457aff; text-decoration: underline;">Register</a>
+    <?php endif; ?>
+    </div>
     <header>
         <h1>Camagru</h1>
     </header>

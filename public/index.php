@@ -9,9 +9,10 @@
 require_once __DIR__ . '/../src/Config/autoload.php';
 
 use Core\Router;
+use Core\Session;
 
 // Start session
-session_start();
+Session::start();
 
 // Create router
 $router = new Router();
@@ -24,6 +25,8 @@ $router->add('home', ['controller' => 'Home', 'action' => 'index']);
 $router->add('auth/register', ['controller' => 'Auth', 'action' => 'register']);
 $router->add('auth/register-post', ['controller' => 'Auth', 'action' => 'registerPost']);
 $router->add('verify', ['controller' => 'Auth', 'action' => 'verify']);
+$router->add('auth/login', ['controller' => 'Auth', 'action' => 'login']);
+$router->add('auth/logout', ['controller' => 'Auth', 'action' => 'logout']);
 
 // Get the URL path
 $url = $_SERVER['REQUEST_URI'] ?? '/';

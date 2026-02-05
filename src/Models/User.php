@@ -70,6 +70,28 @@ class User extends Model
     }
 
     /**
+     * Find user by username OR email (login helper)
+     */
+    public function findByLogin(string $login): ?array
+    {
+        // Note: with PDO::ATTR_EMULATE_PREPARES = false, reusing the same named placeholder
+        // multiple times can trigger "SQLSTATE[HY093]: Invalid parameter number" in MySQL.
+        // Use distinct placeholders instead.
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE username = :login_username OR email = :login_email LIMIT 1");
+        $stmt->execute([
+            'login_username' => $login,
+            'login_email' => $login,
+        ]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Mark verification token null when verified is already done.
+     * (No change needed here unless you want extra helpers later.)
+     */
+
+    /**
      * Find user by verification token
      * 
      * @param string $token
