@@ -324,9 +324,13 @@
     let baseImageData = null;
     let overlayX = 0;
     let overlayY = 0;
+    let overlayWidth = 0;
+    let overlayHeight = 0;
     let isDragging = false;
+    let isResizing = false;
     let dragStartX = 0;
     let dragStartY = 0;
+    const resizeHandleSize = 12;
 
     // Drag and drop functionality
     uploadArea.addEventListener('dragover', (e) => {
@@ -404,6 +408,8 @@
 
             img.onload = () => {
                 selectedOverlayImage = img;
+                overlayWidth = img.width;
+                overlayHeight = img.height;
                 resolve();
             };
 
@@ -455,10 +461,8 @@
                         ctx.globalAlpha = 0.9;
                         ctx.drawImage(
                             selectedOverlayImage,
-                            overlayX,
-                            overlayY,
-                            selectedOverlayImage.width,
-                            selectedOverlayImage.height
+                            overlayWidth,
+                            overlayHeight
                         );
                         ctx.globalAlpha = 1.0;
 
@@ -468,6 +472,25 @@
                         ctx.strokeRect(
                             overlayX,
                             overlayY,
+                            overlayWidth,
+                            overlayHeight
+                        );
+
+                        // Draw resize handle at bottom-right corner
+                        ctx.fillStyle = '#007bff';
+                        ctx.fillRect(
+                            overlayX + overlayWidth - resizeHandleSize / 2,
+                            overlayY + overlayHeight - resizeHandleSize / 2,
+                            resizeHandleSize,
+                            resizeHandleSize
+                        );
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(
+                            overlayX + overlayWidth - resizeHandleSize / 2,
+                            overlayY + overlayHeight - resizeHandleSize / 2,
+                            resizeHandleSize,
+                            resizeHandleSize,
                             selectedOverlayImage.width,
                             selectedOverlayImage.height
                         );
@@ -483,8 +506,8 @@
                         selectedOverlayImage,
                         overlayX,
                         overlayY,
-                        selectedOverlayImage.width,
-                        selectedOverlayImage.height
+                        overlayWidth,
+                        overlayHeight
                     );
                     ctx.globalAlpha = 1.0;
 
@@ -494,8 +517,25 @@
                     ctx.strokeRect(
                         overlayX,
                         overlayY,
-                        selectedOverlayImage.width,
-                        selectedOverlayImage.height
+                        overlayWidth,
+                        overlayHeight
+                    );
+
+                    // Draw resize handle at bottom-right corner
+                    ctx.fillStyle = '#007bff';
+                    ctx.fillRect(
+                        overlayX + overlayWidth - resizeHandleSize,
+                        overlayY + overlayHeight - resizeHandleSize,
+                        resizeHandleSize,
+                        resizeHandleSize
+                    );
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(
+                        overlayX + overlayWidth - resizeHandleSize,
+                        overlayY + overlayHeight - resizeHandleSize,
+                        resizeHandleSize,
+                        resizeHandleSize
                     );
                 }
                 pendingRedraw = false;
@@ -513,12 +553,30 @@
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
 
-        // Check if click is within overlay bounds
+        // Check if clicking on resize handle
+        const handleX = overlayX + overlayWidth - resizeHandleSize;
+        const handleY = overlayY + overlayHeight - resizeHandleSize;
+        
+        if (
+            x >= handleX &&
+            x <= handleX + resizeHandleSize &&
+            y >= handleY &&
+            y <= handleY + resizeHandleSize
+        ) {
+            isResizing = true;
+            dragStartX = x;
+            dragStartY = y;
+            canvas.style.cursor = 'nwse-resize';
+            e.preventDefault();
+            return;
+        }
+
+        // Check if click is within overlay bounds for dragging
         if (
             x >= overlayX &&
-            x <= overlayX + selectedOverlayImage.width &&
+            x <= overlayX + overlayWidth &&
             y >= overlayY &&
-            y <= overlayY + selectedOverlayImage.height
+            y <= overlayY + overlayHeight
         ) {
             isDragging = true;
             dragStartX = x - overlayX;
@@ -535,35 +593,81 @@
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
 
-        if (!isDragging) {
-            // Update cursor when hovering over overlay
-            if (selectedOverlayImage) {
-                if (
-                    x >= overlayX &&
-                    x <= overlayX + selectedOverlayImage.width &&
-                    y >= overlayY &&
-                    y <= overlayY + selectedOverlayImage.height
-                ) {
-                    canvas.style.cursor = 'grab';
-                } else {
-                    canvas.style.cursor = 'default';
-                }
+        if (isResizing) {
+            // Handle resizing
+            const deltaX = x - dragStartX;
+            const deltaY = y - dragStartY;
+            
+            // Maintain aspect ratio
+            const aspectRatio = selectedOverlayImage.width / selectedOverlayImage.height;
+            let newWidth = overlayWidth + deltaX;
+            let newHeight = newWidth / aspectRatio;
+            
+            // Minimum size constraint
+            const minSize = 50;
+            if (newWidth < minSize) {
+                newWidth = minSize;
+                newHeight = minSize / aspectRatio;
             }
+            
+            // Maximum size constraint (don't exceed canvas)
+            if (overlayX + newWidth > canvas.width) {
+                newWidth = canvas.width - overlayX;
+                newHeight = newWidth / aspectRatio;
+            }
+            if (overlayY + newHeight > canvas.height) {
+                newHeight = canvas.height - overlayY;
+                newWidth = newHeight * aspectRatio;
+            }
+            
+            overlayWidth = newWidth;
+            overlayHeight = newHeight;
+            dragStartX = x;
+            dragStartY = y;
+            
+            redrawCanvas();
+            e.preventDefault();
             return;
         }
 
-        if (!selectedOverlayImage) return;
-
-        overlayX = Math.max(0, Math.min(x - dragStartX, canvas.width - selectedOverlayImage.width));
-        overlayY = Math.max(0, Math.min(y - dragStartY, canvas.height - selectedOverlayImage.height));
-
-        redrawCanvas();
-        e.preventDefault();
+        if (isDragging) {
+            // Handle dragging
+            overlayX = Math.max(0, Math.min(x - dragStartX, canvas.width - overlayWidth));
+            overlayY = Math.max(0, Math.min(y - dragStartY, canvas.height - overlayHeight));
+            redrawCanvas();
+            e.preventDefault();
+            return;
+        }
+        // Update cursor when hovering
+        if (selectedOverlayImage) {
+            // Check resize handle
+            const handleX = overlayX + overlayWidth - resizeHandleSize;
+            const handleY = overlayY + overlayHeight - resizeHandleSize;
+            
+            if (
+                x >= handleX &&
+                x <= handleX + resizeHandleSize &&
+                y >= handleY &&
+                y <= handleY + resizeHandleSize
+            ) {
+                canvas.style.cursor = 'nwse-resize';
+            } else if (
+                x >= overlayX &&
+                x <= overlayX + overlayWidth &&
+                y >= overlayY &&
+                y <= overlayY + overlayHeight
+            ) {
+                canvas.style.cursor = 'grab';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+        }
     });
 
     document.addEventListener('mouseup', (e) => {
-        if (isDragging) {
+        if (isDragging || isResizing) {
             isDragging = false;
+            isResizing = false;
             if (selectedOverlayImage) {
                 canvas.style.cursor = 'grab';
             } else {
@@ -651,6 +755,8 @@
             formData.append('overlay_id', selectedOverlayId);
             formData.append('overlay_x', Math.round(overlayX));
             formData.append('overlay_y', Math.round(overlayY));
+            formData.append('overlay_width', Math.round(overlayWidth));
+            formData.append('overlay_height', Math.round(overlayHeight));
             formData.append('csrf_token', csrfToken);
 
             console.log('Form data prepared');
@@ -694,8 +800,13 @@
         selectedOverlayId = null;
         selectedOverlayImage = null;
         baseImageData = null;
+        cachedBaseImage = null;
         overlayX = 0;
         overlayY = 0;
+        overlayWidth = 0;
+        overlayHeight = 0;
+        isDragging = false;
+        isResizing = false;
         imageUpload.value = '';
         uploadArea.style.display = 'block'; // Show upload area again
         uploadPrompt.style.display = 'block'; // Show upload prompt again

@@ -24,9 +24,11 @@ class ImageCompositionService
      * @param string $overlayFilename Filename of the overlay image
      * @param int $overlayX X position of overlay
      * @param int $overlayY Y position of overlay
+     * @param int $overlayWidth Width of overlay (0 for original size)
+     * @param int $overlayHeight Height of overlay (0 for original size)
      * @return array Result with success status and data
      */
-    public function composeImages(string $baseImageTmpPath, string $overlayFilename, int $overlayX = 0, int $overlayY = 0): array
+    public function composeImages(string $baseImageTmpPath, string $overlayFilename, int $overlayX = 0, int $overlayY = 0, int $overlayWidth = 0, int $overlayHeight = 0): array
     {
         // Validate inputs
         if (!file_exists($baseImageTmpPath)) {
@@ -52,11 +54,19 @@ class ImageCompositionService
                 return ['success' => false, 'error' => 'Failed to load overlay image'];
             }
 
-            // Resize images to a standard size (e.g., 800x600)
+            // Resize base image to standard size
             $standardWidth = 800;
             $standardHeight = 600;
             $resizedBase = $this->resizeImage($baseImage, $standardWidth, $standardHeight);
-            $resizedOverlay = with positioning
+            
+            // Resize overlay - use custom size if provided, otherwise use original size
+            if ($overlayWidth > 0 && $overlayHeight > 0) {
+                $resizedOverlay = $this->resizeImage($overlayImage, $overlayWidth, $overlayHeight);
+            } else {
+                $resizedOverlay = $overlayImage;
+            }
+
+            // Compose images with positioning
             imagecopy(
                 $resizedBase,
                 $resizedOverlay,
@@ -66,9 +76,7 @@ class ImageCompositionService
                 0,
                 imagesx($resizedOverlay),
                 imagesy($resizedOverlay)
-            
-            // Compose images
-            imagecopy($resizedBase, $resizedOverlay, 0, 0, 0, 0, $standardWidth, $standardHeight);
+            );
 
             // Generate unique filename
             $filename = $this->generateFilename();

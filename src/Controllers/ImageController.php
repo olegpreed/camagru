@@ -163,6 +163,8 @@ class ImageController extends Controller
         $overlayId = (int)$_POST['overlay_id'];
         $overlayX = (int)($_POST['overlay_x'] ?? 0);
         $overlayY = (int)($_POST['overlay_y'] ?? 0);
+        $overlayWidth = (int)($_POST['overlay_width'] ?? 0);
+        $overlayHeight = (int)($_POST['overlay_height'] ?? 0);
         $baseImageFile = $_FILES['base_image'];
 
         // Validate overlay exists
@@ -208,7 +210,9 @@ class ImageController extends Controller
             $baseImageFile['tmp_name'],
             $selectedOverlay['filename'],
             $overlayX,
-            $overlayY
+            $overlayY,
+            $overlayWidth,
+            $overlayHeight
         );
 
         if (!$result['success']) {
