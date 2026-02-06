@@ -77,3 +77,12 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX idx_comments_image_id (image_id),
     INDEX idx_comments_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert sample superposable overlay images
+-- Add corresponding PNG files to public/assets/overlays/
+INSERT INTO superposable_images (name, filename) VALUES
+('Sunglasses', 'sunglasses.png'),
+('Mustache', 'mustache.png'),
+('Crown', 'crown.png'),
+('Heart Frame', 'heart-frame.png'),
+('Star Effect', 'star-effect.png');

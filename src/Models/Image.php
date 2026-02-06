@@ -66,4 +66,84 @@ class Image extends Model
             return [];
         }
     }
+
+    /**
+     * Get all images for a specific user
+     *
+     * @param int $userId
+     * @return array
+     */
+    public function findByUserId(int $userId): array
+    {
+        $sql = "SELECT * FROM {$this->table}
+                WHERE user_id = :user_id
+                ORDER BY created_at DESC";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['user_id' => $userId]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Failed to fetch user images: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get all available superposable overlay images
+     *
+     * @return array
+     */
+    public function getSuperposableImages(): array
+    {
+        $sql = "SELECT * FROM superposable_images ORDER BY id ASC";
+
+        try {
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Failed to fetch superposable images: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Find image by ID
+     *
+     * @param int $id
+     * @return array|null
+     */
+    public function findById(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $id]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (\PDOException $e) {
+            error_log("Failed to fetch image: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Delete an image by ID
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
+        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['id' => $id]);
+        } catch (\PDOException $e) {
+            error_log("Failed to delete image: " . $e->getMessage());
+            return false;
+        }
+    }
 }

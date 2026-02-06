@@ -37,6 +37,11 @@ $router->add('user/change-password', ['controller' => 'User', 'action' => 'chang
 $router->add('user/reset-password', ['controller' => 'User', 'action' => 'resetPassword']);
 
 // Image routes
+$router->add('image/edit', ['controller' => 'Image', 'action' => 'edit']);
+$router->add('image/getCsrfToken', ['controller' => 'Image', 'action' => 'getCsrfToken']);
+$router->add('image/compose', ['controller' => 'Image', 'action' => 'compose']);
+$router->add('image/getUserImages', ['controller' => 'Image', 'action' => 'getUserImages']);
+$router->add('image/delete', ['controller' => 'Image', 'action' => 'delete']);
 $router->add('image/upload', ['controller' => 'Image', 'action' => 'upload']);
 $router->add('gallery', ['controller' => 'Image', 'action' => 'gallery']);
 

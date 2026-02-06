@@ -1,0 +1,784 @@
+<style>
+    .edit-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .main-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+    }
+
+    .upload-area {
+        background: white;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 3rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .upload-area.dragover {
+        border-color: #007bff;
+        background: #e7f3ff;
+    }
+
+    #preview-image {
+        max-width: 100%;
+        max-height: 400px;
+        display: none;
+        margin-bottom: 1rem;
+    }
+
+    .upload-input {
+        display: none;
+    }
+
+    .upload-btn {
+        background: #007bff;
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+    }
+
+    .upload-btn:hover {
+        background: #0056b3;
+    }
+
+    .overlays-section {
+        margin-bottom: 2rem;
+    }
+
+    .overlays-section h3 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+
+    .overlays-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 1rem;
+    }
+
+    .overlay-item {
+        position: relative;
+        cursor: pointer;
+        border: 3px solid transparent;
+        border-radius: 8px;
+        padding: 0.5rem;
+        background: white;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .overlay-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .overlay-item.selected {
+        border-color: #28a745;
+        background: #e8f5e9;
+    }
+
+    .overlay-item input[type="radio"] {
+        display: none;
+    }
+
+    .overlay-preview {
+        width: 60px;
+        height: 60px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+    }
+
+    .overlay-name {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .capture-btn {
+        background: #28a745;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: bold;
+        width: 100%;
+        transition: background 0.3s;
+    }
+
+    .capture-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .capture-btn:not(:disabled):hover {
+        background: #218838;
+    }
+
+    .sidebar {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .sidebar h3 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+
+    .thumbnails-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .thumbnail-item {
+        position: relative;
+        background: white;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .thumbnail-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .delete-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: background 0.3s;
+    }
+
+    .delete-btn:hover {
+        background: #c82333;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #6c757d;
+        padding: 2rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    #preview-canvas {
+        border: 1px solid #ddd;
+        max-width: 100%;
+        display: block;
+        margin-bottom: 1rem;
+        cursor: grab;
+        background: white;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .loading.show {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .edit-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="edit-container">
+    <div class="main-section">
+        <h2>Create Your Image</h2>
+
+        <div id="alert-container"></div>
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="upload-area">
+            <img id="preview-image" alt="Preview">
+            <div id="upload-prompt">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">📷</p>
+                <p style="margin-bottom: 1rem;">Drag & drop an image here, or click to select</p>
+                <button type="button" class="upload-btn" onclick="document.getElementById('image-upload').click()">
+                    Choose Image
+                </button>
+            </div>
+            <input type="file" id="image-upload" class="upload-input" accept="image/jpeg,image/jpg,image/png,image/gif">
+        </div>
+
+        <!-- Canvas Preview -->
+        <div id="canvas-container" style="display: none; margin-bottom: 2rem;">
+            <h3>Preview</h3>
+            <canvas id="preview-canvas" style="border: 1px solid #ddd; max-width: 100%; display: block; margin-bottom: 1rem;"></canvas>
+            <p style="color: #6c757d; font-size: 0.9rem;">Drag the overlay to position it</p>
+        </div>
+
+        <!-- Overlays Selection -->
+        <div class="overlays-section">
+            <h3>Select an Overlay</h3>
+            <div class="overlays-grid" id="overlays-grid">
+                <?php if (empty($superposableImages)): ?>
+                    <p class="empty-state">No overlays available. Please add overlay images to /public/assets/overlays/</p>
+                <?php else: ?>
+                    <?php foreach ($superposableImages as $overlay): ?>
+                        <label class="overlay-item" data-overlay-id="<?= htmlspecialchars($overlay['id']) ?>">
+                            <input type="radio" name="overlay" value="<?= htmlspecialchars($overlay['id']) ?>">
+                            <div class="overlay-preview">
+                                <img src="/assets/overlays/<?= htmlspecialchars($overlay['filename']) ?>" 
+                                     alt="<?= htmlspecialchars($overlay['name']) ?>"
+                                     style="max-width: 100%; max-height: 100%;"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span>📄</span>'">
+                            </div>
+                            <div class="overlay-name"><?= htmlspecialchars($overlay['name']) ?></div>
+                        </label>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Capture Button -->
+        <button type="button" class="capture-btn" id="capture-btn" disabled>
+            Create Image
+        </button>
+
+        <div class="loading" id="loading">
+            <p>Composing your image, please wait...</p>
+        </div>
+    </div>
+
+    <!-- Sidebar with User's Images -->
+    <div class="sidebar">
+        <h3>Your Images</h3>
+        <div class="thumbnails-grid" id="thumbnails-grid">
+            <div class="empty-state">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('upload-area');
+    const imageUpload = document.getElementById('image-upload');
+    const previewImage = document.getElementById('preview-image');
+    const uploadPrompt = document.getElementById('upload-prompt');
+    const captureBtn = document.getElementById('capture-btn');
+    const overlaysGrid = document.getElementById('overlays-grid');
+    const thumbnailsGrid = document.getElementById('thumbnails-grid');
+    const alertContainer = document.getElementById('alert-container');
+    const loading = document.getElementById('loading');
+    const canvasContainer = document.getElementById('canvas-container');
+    const canvas = document.getElementById('preview-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let selectedFile = null;
+    let selectedOverlayId = null;
+    let selectedOverlayImage = null;
+    let baseImageData = null;
+    let overlayX = 0;
+    let overlayY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+
+    // File input change
+    imageUpload.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Handle file selection
+    function handleFileSelect(file) {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            showAlert('Please select a valid image file (JPG, PNG, or GIF)', 'error');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('File size must be less than 5MB', 'error');
+            return;
+        }
+
+        selectedFile = file;
+
+        // Load image and show canvas
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            baseImageData = e.target.result;
+            uploadArea.style.display = 'none'; // Hide entire upload area
+            uploadPrompt.style.display = 'none';
+
+            // Setup canvas and show it with base image
+            setupCanvas();
+            canvasContainer.style.display = 'block';
+
+            // If overlay is already selected, load it
+            if (selectedOverlayId) {
+                await loadOverlayImage();
+            }
+
+            updateCaptureButton();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Load overlay image from the server
+    async function loadOverlayImage() {
+        if (!selectedOverlayId) return;
+
+        return new Promise((resolve) => {
+            const overlayItem = document.querySelector(`[data-overlay-id="${selectedOverlayId}"]`);
+            const overlayImg = overlayItem.querySelector('img');
+            const img = new Image();
+
+            img.onload = () => {
+                selectedOverlayImage = img;
+                resolve();
+            };
+
+            img.onerror = () => {
+                showAlert('Failed to load overlay image', 'error');
+                resolve();
+            };
+
+            img.src = overlayImg.src;
+        });
+    }
+
+    // Setup canvas dimensions
+    function setupCanvas() {
+        if (!baseImageData) return;
+
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            redrawCanvas(); // Draw after dimensions are set
+        };
+        img.src = baseImageData;
+    }
+
+    // Cached images for faster rendering
+    let cachedBaseImage = null;
+    let pendingRedraw = false;
+
+    // Redraw canvas with base image and overlay
+    function redrawCanvas() {
+        if (!baseImageData || canvas.width === 0) return;
+
+        if (pendingRedraw) return; // Skip if already scheduled
+        pendingRedraw = true;
+
+        requestAnimationFrame(() => {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw base image (load only once)
+            if (!cachedBaseImage) {
+                cachedBaseImage = new Image();
+                cachedBaseImage.src = baseImageData;
+                cachedBaseImage.onload = () => {
+                    ctx.drawImage(cachedBaseImage, 0, 0, canvas.width, canvas.height);
+                    // Draw overlay if available
+                    if (selectedOverlayImage) {
+                        ctx.globalAlpha = 0.9;
+                        ctx.drawImage(
+                            selectedOverlayImage,
+                            overlayX,
+                            overlayY,
+                            selectedOverlayImage.width,
+                            selectedOverlayImage.height
+                        );
+                        ctx.globalAlpha = 1.0;
+
+                        // Draw border around overlay
+                        ctx.strokeStyle = '#007bff';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(
+                            overlayX,
+                            overlayY,
+                            selectedOverlayImage.width,
+                            selectedOverlayImage.height
+                        );
+                    }
+                    pendingRedraw = false;
+                };
+            } else {
+                ctx.drawImage(cachedBaseImage, 0, 0, canvas.width, canvas.height);
+                // Draw overlay if available
+                if (selectedOverlayImage) {
+                    ctx.globalAlpha = 0.9;
+                    ctx.drawImage(
+                        selectedOverlayImage,
+                        overlayX,
+                        overlayY,
+                        selectedOverlayImage.width,
+                        selectedOverlayImage.height
+                    );
+                    ctx.globalAlpha = 1.0;
+
+                    // Draw border around overlay
+                    ctx.strokeStyle = '#007bff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(
+                        overlayX,
+                        overlayY,
+                        selectedOverlayImage.width,
+                        selectedOverlayImage.height
+                    );
+                }
+                pendingRedraw = false;
+            }
+        });
+    }
+
+    // Canvas mouse events for dragging overlay
+    canvas.addEventListener('mousedown', (e) => {
+        if (!selectedOverlayImage) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        // Check if click is within overlay bounds
+        if (
+            x >= overlayX &&
+            x <= overlayX + selectedOverlayImage.width &&
+            y >= overlayY &&
+            y <= overlayY + selectedOverlayImage.height
+        ) {
+            isDragging = true;
+            dragStartX = x - overlayX;
+            dragStartY = y - overlayY;
+            canvas.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        if (!isDragging) {
+            // Update cursor when hovering over overlay
+            if (selectedOverlayImage) {
+                if (
+                    x >= overlayX &&
+                    x <= overlayX + selectedOverlayImage.width &&
+                    y >= overlayY &&
+                    y <= overlayY + selectedOverlayImage.height
+                ) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            }
+            return;
+        }
+
+        if (!selectedOverlayImage) return;
+
+        overlayX = Math.max(0, Math.min(x - dragStartX, canvas.width - selectedOverlayImage.width));
+        overlayY = Math.max(0, Math.min(y - dragStartY, canvas.height - selectedOverlayImage.height));
+
+        redrawCanvas();
+        e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', (e) => {
+        if (isDragging) {
+            isDragging = false;
+            if (selectedOverlayImage) {
+                canvas.style.cursor = 'grab';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+            e.preventDefault();
+        }
+    });
+
+    canvas.addEventListener('mouseleave', (e) => {
+        if (!isDragging && selectedOverlayImage) {
+            canvas.style.cursor = 'default';
+        }
+    });
+
+    // Show cursor feedback
+    canvas.addEventListener('mouseover', () => {
+        if (selectedOverlayImage) {
+            canvas.style.cursor = 'grab';
+        }
+    });
+
+    // Overlay selection
+    overlaysGrid.addEventListener('click', async (e) => {
+        const overlayItem = e.target.closest('.overlay-item');
+        if (!overlayItem) return;
+
+        // Remove previous selection
+        document.querySelectorAll('.overlay-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        // Select this overlay
+        overlayItem.classList.add('selected');
+        const radio = overlayItem.querySelector('input[type="radio"]');
+        radio.checked = true;
+        selectedOverlayId = radio.value;
+
+        // Load overlay image if base image is selected
+        if (selectedFile) {
+            await loadOverlayImage();
+            setupCanvas();
+            previewImage.style.display = 'none'; // Hide the simple preview
+            canvasContainer.style.display = 'block'; // Show the interactive canvas
+        }
+
+        updateCaptureButton();
+    });
+
+    // Update capture button state
+    function updateCaptureButton() {
+        captureBtn.disabled = !(selectedFile && selectedOverlayId);
+    }
+
+    // Capture/Create image
+    captureBtn.addEventListener('click', async () => {
+        console.log('Capture button clicked');
+        console.log('Selected file:', selectedFile);
+        console.log('Selected overlay ID:', selectedOverlayId);
+        console.log('Overlay position:', overlayX, overlayY);
+        
+        if (!selectedFile || !selectedOverlayId) {
+            showAlert('Please select both an image and an overlay', 'error');
+            return;
+        }
+
+        // Show loading
+        loading.classList.add('show');
+        captureBtn.disabled = true;
+
+        try {
+            // Get fresh CSRF token
+            console.log('Fetching CSRF token...');
+            const tokenResponse = await fetch('/image/getCsrfToken');
+            if (!tokenResponse.ok) {
+                throw new Error('Failed to get CSRF token');
+            }
+            const tokenData = await tokenResponse.json();
+            const csrfToken = tokenData.csrf_token;
+            console.log('CSRF token retrieved');
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('base_image', selectedFile);
+            formData.append('overlay_id', selectedOverlayId);
+            formData.append('overlay_x', Math.round(overlayX));
+            formData.append('overlay_y', Math.round(overlayY));
+            formData.append('csrf_token', csrfToken);
+
+            console.log('Form data prepared');
+            console.log('Sending request to /image/compose');
+
+            const response = await fetch('/image/compose', {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log('Response received:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Response text:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (data.success) {
+                showAlert('Image created successfully!', 'success');
+                resetForm();
+                loadUserImages(); // Reload thumbnails
+            } else {
+                showAlert(data.error || 'Failed to create image', 'error');
+            }
+        } catch (error) {
+            showAlert('An error occurred: ' + error.message, 'error');
+            console.error('Image composition error:', error);
+        } finally {
+            loading.classList.remove('show');
+            updateCaptureButton();
+        }
+    });
+
+    // Reset form
+    function resetForm() {
+        selectedFile = null;
+        selectedOverlayId = null;
+        selectedOverlayImage = null;
+        baseImageData = null;
+        overlayX = 0;
+        overlayY = 0;
+        imageUpload.value = '';
+        uploadArea.style.display = 'block'; // Show upload area again
+        uploadPrompt.style.display = 'block'; // Show upload prompt again
+        canvasContainer.style.display = 'none'; // Hide canvas
+        
+        document.querySelectorAll('.overlay-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        document.querySelectorAll('input[name="overlay"]').forEach(radio => {
+            radio.checked = false;
+        });
+    }
+
+    // Load user's images
+    async function loadUserImages() {
+        try {
+            const response = await fetch('/image/getUserImages');
+            const data = await response.json();
+
+            if (data.success && data.images.length > 0) {
+                thumbnailsGrid.innerHTML = data.images.map(image => `
+                    <div class="thumbnail-item" data-image-id="${image.id}">
+                        <img src="${image.url}" alt="User image">
+                        <button class="delete-btn" onclick="deleteImage(${image.id})">Delete</button>
+                    </div>
+                `).join('');
+            } else {
+                thumbnailsGrid.innerHTML = '<div class="empty-state">No images yet. Create your first one!</div>';
+            }
+        } catch (error) {
+            console.error('Failed to load images:', error);
+            thumbnailsGrid.innerHTML = '<div class="empty-state">Failed to load images</div>';
+        }
+    }
+
+    // Delete image
+    async function deleteImage(imageId) {
+        if (!confirm('Are you sure you want to delete this image?')) {
+            return;
+        }
+
+        try {
+            // Get fresh CSRF token
+            const tokenResponse = await fetch('/image/getCsrfToken');
+            if (!tokenResponse.ok) {
+                throw new Error('Failed to get CSRF token');
+            }
+            const tokenData = await tokenResponse.json();
+
+            const formData = new FormData();
+            formData.append('image_id', imageId);
+            formData.append('csrf_token', tokenData.csrf_token);
+
+            const response = await fetch('/image/delete', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showAlert('Image deleted successfully', 'success');
+                loadUserImages(); // Reload thumbnails
+            } else {
+                showAlert(data.error || 'Failed to delete image', 'error');
+            }
+        } catch (error) {
+            showAlert('An error occurred: ' + error.message, 'error');
+            console.error('Delete image error:', error);
+        }
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        alertContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            alertContainer.innerHTML = '';
+        }, 5000);
+    }
+
+    // Load user images on page load
+    loadUserImages();
+</script>

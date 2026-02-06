@@ -59,7 +59,7 @@
             <nav style="display: flex; gap: 1.5rem; align-items: center;">
                 <a href="/gallery" style="color: white; text-decoration: none;">Gallery</a>
                 <?php if ($user): ?>
-                    <a href="/image/upload" style="color: white; text-decoration: none;">Upload</a>
+                    <a href="/image/edit" style="color: white; text-decoration: none;">Create</a>
                     <a href="/user/profile" style="color: white; text-decoration: none;">Profile</a>
                     <span style="color: #ecf0f1;"><?= htmlspecialchars($user['username']) ?></span>
                     <a href="/auth/logout" style="color: #ecf0f1; text-decoration: underline;">Logout</a>
