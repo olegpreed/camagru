@@ -36,6 +36,10 @@ $router->add('user/edit-profile', ['controller' => 'User', 'action' => 'editProf
 $router->add('user/change-password', ['controller' => 'User', 'action' => 'changePassword']);
 $router->add('user/reset-password', ['controller' => 'User', 'action' => 'resetPassword']);
 
+// Image routes
+$router->add('image/upload', ['controller' => 'Image', 'action' => 'upload']);
+$router->add('gallery', ['controller' => 'Image', 'action' => 'gallery']);
+
 // Get the URL path
 $url = $_SERVER['REQUEST_URI'] ?? '/';
 

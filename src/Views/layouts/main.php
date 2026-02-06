@@ -53,17 +53,22 @@
 
     $user = AuthMiddleware::user();
     ?>
-    <div style="margin-top: 0.5rem; font-size: 0.95rem;">
-    <?php if ($user): ?>
-        Logged in as <strong><?= htmlspecialchars($user['username']) ?></strong>
-        - <a href="/auth/logout" style="color: #457aff; text-decoration: underline;">Logout</a>
-    <?php else: ?>
-        <a href="/auth/login" style="color: #457aff; text-decoration: underline;">Login</a>
-        | <a href="/auth/register" style="color: #457aff; text-decoration: underline;">Register</a>
-    <?php endif; ?>
-    </div>
     <header>
-        <h1>Camagru</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1><a href="/" style="color: white; text-decoration: none;">Camagru</a></h1>
+            <nav style="display: flex; gap: 1.5rem; align-items: center;">
+                <a href="/gallery" style="color: white; text-decoration: none;">Gallery</a>
+                <?php if ($user): ?>
+                    <a href="/image/upload" style="color: white; text-decoration: none;">Upload</a>
+                    <a href="/user/profile" style="color: white; text-decoration: none;">Profile</a>
+                    <span style="color: #ecf0f1;"><?= htmlspecialchars($user['username']) ?></span>
+                    <a href="/auth/logout" style="color: #ecf0f1; text-decoration: underline;">Logout</a>
+                <?php else: ?>
+                    <a href="/auth/login" style="color: #ecf0f1; text-decoration: underline;">Login</a>
+                    <a href="/auth/register" style="color: #ecf0f1; text-decoration: underline;">Register</a>
+                <?php endif; ?>
+            </nav>
+        </div>
     </header>
     
     <main>
