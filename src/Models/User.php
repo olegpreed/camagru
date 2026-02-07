@@ -294,10 +294,10 @@ class User extends Model
      * @param string $email
      * @return bool
      */
-    public function updateProfile(int $userId, string $username, string $email): bool
+    public function updateProfile(int $userId, string $username, string $email, int $commentNotifications): bool
     {
         $sql = "UPDATE {$this->table} 
-                SET username = :username, email = :email, updated_at = NOW() 
+                SET username = :username, email = :email, comment_notifications = :comment_notifications, updated_at = NOW() 
                 WHERE id = :id";
         
         try {
@@ -305,6 +305,7 @@ class User extends Model
             return $stmt->execute([
                 'username' => $username,
                 'email' => $email,
+                'comment_notifications' => $commentNotifications,
                 'id' => $userId
             ]);
         } catch (PDOException $e) {

@@ -82,7 +82,9 @@ class Image extends Model
                     i.original_filename,
                     i.created_at,
                     u.id as user_id,
-                    u.username
+                    u.username,
+                    (SELECT COUNT(*) FROM likes l WHERE l.image_id = i.id) as like_count,
+                    (SELECT COUNT(*) FROM comments c WHERE c.image_id = i.id) as comment_count
                 FROM {$this->table} i
                 INNER JOIN users u ON i.user_id = u.id
                 ORDER BY i.created_at DESC
@@ -157,6 +159,39 @@ class Image extends Model
             return $result ?: null;
         } catch (\PDOException $e) {
             error_log("Failed to fetch image: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Find image by ID with author info
+     *
+     * @param int $id
+     * @return array|null
+     */
+    public function findByIdWithUser(int $id): ?array
+    {
+        $sql = "SELECT 
+                    i.id,
+                    i.filename,
+                    i.original_filename,
+                    i.created_at,
+                    i.user_id,
+                    u.username,
+                    u.email,
+                    u.comment_notifications
+                FROM {$this->table} i
+                INNER JOIN users u ON i.user_id = u.id
+                WHERE i.id = :id
+                LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $id]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (\PDOException $e) {
+            error_log("Failed to fetch image with user: " . $e->getMessage());
             return null;
         }
     }

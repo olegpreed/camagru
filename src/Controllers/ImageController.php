@@ -6,8 +6,11 @@ use Core\Controller;
 use Core\CSRF;
 use Middleware\AuthMiddleware;
 use Models\Image;
+use Models\Like;
+use Models\Comment;
 use Services\FileUploadService;
 use Services\ImageCompositionService;
+use Services\EmailService;
 
 /**
  * Image Controller
@@ -18,7 +21,16 @@ class ImageController extends Controller
     protected function before(): bool
     {
         // Gallery is public, but other actions require authentication
-        $protectedActions = ['upload', 'edit', 'compose', 'getUserImages', 'delete', 'getCsrfToken'];
+        $protectedActions = [
+            'upload',
+            'edit',
+            'compose',
+            'getUserImages',
+            'delete',
+            'getCsrfToken',
+            'toggleLike',
+            'addComment'
+        ];
         $action = $this->routeParams['action'] ?? '';
 
         if (in_array($action, $protectedActions, true)) {
@@ -131,6 +143,180 @@ class ImageController extends Controller
             'success' => true,
             'images' => $images,
             'count' => count($images)
+        ]);
+    }
+
+    /**
+     * Get image details with comments (AJAX endpoint)
+     */
+    public function getImageDetailsAction(): void
+    {
+        header('Content-Type: application/json');
+
+        $imageId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        if ($imageId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid image ID']);
+            return;
+        }
+
+        $imageModel = new Image();
+        $image = $imageModel->findByIdWithUser($imageId);
+
+        if (!$image) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+            return;
+        }
+
+        $likeModel = new Like();
+        $commentModel = new Comment();
+
+        $likeCount = $likeModel->countByImageId($imageId);
+        $commentCount = $commentModel->countByImageId($imageId);
+        $comments = $commentModel->getByImageId($imageId);
+
+        $currentUser = AuthMiddleware::user();
+        $likedByUser = false;
+        if ($currentUser) {
+            $likedByUser = $likeModel->isLikedByUser($imageId, (int)$currentUser['id']);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'image' => [
+                'id' => $image['id'],
+                'filename' => $image['filename'],
+                'original_filename' => $image['original_filename'],
+                'created_at' => $image['created_at'],
+                'username' => $image['username']
+            ],
+            'like_count' => $likeCount,
+            'comment_count' => $commentCount,
+            'liked_by_user' => $likedByUser,
+            'comments' => $comments
+        ]);
+    }
+
+    /**
+     * Toggle like for an image (AJAX endpoint)
+     */
+    public function toggleLikeAction(): void
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+            return;
+        }
+
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (!CSRF::verify($csrfToken)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid security token']);
+            return;
+        }
+
+        $imageId = (int)($_POST['image_id'] ?? 0);
+        if ($imageId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid image ID']);
+            return;
+        }
+
+        $imageModel = new Image();
+        if (!$imageModel->findById($imageId)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+            return;
+        }
+
+        $user = AuthMiddleware::user();
+        $likeModel = new Like();
+        $result = $likeModel->toggleLike($imageId, (int)$user['id']);
+
+        echo json_encode([
+            'success' => true,
+            'liked' => $result['liked'],
+            'count' => $result['count']
+        ]);
+    }
+
+    /**
+     * Add comment to an image (AJAX endpoint)
+     */
+    public function addCommentAction(): void
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+            return;
+        }
+
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (!CSRF::verify($csrfToken)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid security token']);
+            return;
+        }
+
+        $imageId = (int)($_POST['image_id'] ?? 0);
+        $content = trim($_POST['content'] ?? '');
+
+        if ($imageId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid image ID']);
+            return;
+        }
+
+        if ($content === '' || strlen($content) > 500) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Comment must be between 1 and 500 characters']);
+            return;
+        }
+
+        $imageModel = new Image();
+        $image = $imageModel->findByIdWithUser($imageId);
+        if (!$image) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Image not found']);
+            return;
+        }
+
+        $user = AuthMiddleware::user();
+        $commentModel = new Comment();
+        $commentId = $commentModel->create($imageId, (int)$user['id'], $content);
+
+        if (!$commentId) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to add comment']);
+            return;
+        }
+
+        // Notify image author if enabled and not self-comment
+        if ((int)$image['user_id'] !== (int)$user['id'] && (int)$image['comment_notifications'] === 1) {
+            $appUrl = getenv('APP_URL') ?: 'http://localhost:8080';
+            $imageUrl = $appUrl . '/uploads/images/' . $image['filename'];
+            $emailService = new EmailService();
+            $emailService->sendCommentNotification(
+                $image['email'],
+                $image['username'],
+                $user['username'],
+                $imageUrl,
+                $content
+            );
+        }
+
+        $commentCount = $commentModel->countByImageId($imageId);
+        $comments = $commentModel->getByImageId($imageId);
+
+        echo json_encode([
+            'success' => true,
+            'comment_count' => $commentCount,
+            'comments' => $comments
         ]);
     }
 

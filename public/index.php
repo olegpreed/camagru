@@ -42,6 +42,9 @@ $router->add('image/getCsrfToken', ['controller' => 'Image', 'action' => 'getCsr
 $router->add('image/compose', ['controller' => 'Image', 'action' => 'compose']);
 $router->add('image/getUserImages', ['controller' => 'Image', 'action' => 'getUserImages']);
 $router->add('image/getImages', ['controller' => 'Image', 'action' => 'getImages']);
+$router->add('image/getImageDetails', ['controller' => 'Image', 'action' => 'getImageDetails']);
+$router->add('image/toggleLike', ['controller' => 'Image', 'action' => 'toggleLike']);
+$router->add('image/addComment', ['controller' => 'Image', 'action' => 'addComment']);
 $router->add('image/delete', ['controller' => 'Image', 'action' => 'delete']);
 $router->add('image/upload', ['controller' => 'Image', 'action' => 'upload']);
 $router->add('gallery', ['controller' => 'Image', 'action' => 'gallery']);

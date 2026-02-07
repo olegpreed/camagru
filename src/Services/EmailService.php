@@ -71,6 +71,31 @@ class EmailService
     }
 
     /**
+     * Send comment notification email
+     *
+     * @param string $toEmail
+     * @param string $authorUsername
+     * @param string $commenterUsername
+     * @param string $imageUrl
+     * @param string $commentText
+     * @return bool
+     */
+    public function sendCommentNotification(
+        string $toEmail,
+        string $authorUsername,
+        string $commenterUsername,
+        string $imageUrl,
+        string $commentText
+    ): bool {
+        error_log("sendCommentNotification called for {$toEmail}");
+
+        $subject = "New comment on your Camagru image";
+        $message = $this->getCommentNotificationTemplate($authorUsername, $commenterUsername, $imageUrl, $commentText);
+
+        return $this->sendEmail($toEmail, $subject, $message);
+    }
+
+    /**
      * High-level send method with dev/prod behavior
      *
      * @param string $to
@@ -240,6 +265,27 @@ class EmailService
         fclose($fp);
 
         return true;
+    }
+
+    /**
+     * Comment notification email template
+     */
+    private function getCommentNotificationTemplate(
+        string $authorUsername,
+        string $commenterUsername,
+        string $imageUrl,
+        string $commentText
+    ): string {
+        $safeComment = htmlspecialchars($commentText, ENT_QUOTES, 'UTF-8');
+        $safeImageUrl = htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8');
+        $safeAuthor = htmlspecialchars($authorUsername, ENT_QUOTES, 'UTF-8');
+        $safeCommenter = htmlspecialchars($commenterUsername, ENT_QUOTES, 'UTF-8');
+
+        return "<h2>Hello {$safeAuthor},</h2>" .
+            "<p><strong>{$safeCommenter}</strong> left a comment on your image:</p>" .
+            "<blockquote style=\"border-left: 3px solid #ddd; padding-left: 10px; color: #555;\">{$safeComment}</blockquote>" .
+            "<p>View the image here: <a href=\"{$safeImageUrl}\">{$safeImageUrl}</a></p>" .
+            "<p>If you no longer want to receive these notifications, you can disable them in your profile settings.</p>";
     }
 
     /**

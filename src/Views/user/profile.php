@@ -69,6 +69,21 @@
                             <?php endif; ?>
                         </div>
 
+                        <div class="form-group">
+                            <label>
+                                <input 
+                                    type="checkbox" 
+                                    name="comment_notifications" 
+                                    value="1"
+                                    <?php
+                                        $notifications = $old['comment_notifications'] ?? $user['comment_notifications'];
+                                        echo ((int)$notifications === 1) ? 'checked' : '';
+                                    ?>
+                                >
+                                Email me when someone comments on my images
+                            </label>
+                        </div>
+
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                             <a href="/user/profile" class="btn btn-secondary">Cancel</a>
@@ -98,6 +113,12 @@
                             <span class="info-label">Member Since:</span>
                             <span class="info-value">
                                 <?php echo date('F j, Y', strtotime($user['created_at'])); ?>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Comment Notifications:</span>
+                            <span class="info-value">
+                                <?php echo ((int)$user['comment_notifications'] === 1) ? 'Enabled' : 'Disabled'; ?>
                             </span>
                         </div>
                     </div>

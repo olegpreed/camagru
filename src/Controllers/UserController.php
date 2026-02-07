@@ -272,6 +272,7 @@ class UserController extends Controller
 
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $commentNotifications = isset($_POST['comment_notifications']) ? 1 : 0;
         $userModel = new User();
         $currentUser = $userModel->findById($userId);
 
@@ -305,7 +306,7 @@ class UserController extends Controller
         }
 
         // Update profile
-        if ($userModel->updateProfile($userId, $username, $email)) {
+        if ($userModel->updateProfile($userId, $username, $email, $commentNotifications)) {
             // Update session
             \Core\Session::set('user', [
                 'id' => $userId,
