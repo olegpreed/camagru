@@ -13,6 +13,85 @@
         border-radius: 8px;
     }
 
+    .webcam-area {
+        background: white;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .webcam-area.hidden {
+        display: none;
+    }
+
+    #video-stream {
+        width: 100%;
+        max-width: 600px;
+        border-radius: 8px;
+        background: #000;
+        margin-bottom: 1rem;
+    }
+
+    .webcam-controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .capture-photo-btn {
+        background: #28a745;
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+        font-weight: bold;
+    }
+
+    .capture-photo-btn:hover:not(:disabled) {
+        background: #218838;
+    }
+
+    .capture-photo-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .toggle-upload-btn {
+        background: #6c757d;
+        color: white;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+    }
+
+    .toggle-upload-btn:hover {
+        background: #5a6268;
+    }
+
+    .camera-permission-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
     .upload-area {
         background: white;
         border: 2px dashed #dee2e6;
@@ -26,6 +105,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+    }
+
+    .upload-area.hidden {
+        display: none;
     }
 
     .upload-area.dragover {
@@ -242,14 +325,34 @@
 
         <div id="alert-container"></div>
 
+        <!-- Webcam Area -->
+        <div class="webcam-area" id="webcam-area">
+            <div id="camera-permission-error" class="camera-permission-error" style="display: none;">
+                <p>Unable to access camera. Please check your permissions or use the upload option instead.</p>
+            </div>
+            <video id="video-stream" autoplay playsinline muted style="display: none;"></video>
+            <div class="webcam-controls" id="webcam-controls" style="display: none;">
+                <button type="button" class="capture-photo-btn" id="capture-photo-btn">
+                    📸 Capture Photo
+                </button>
+                <button type="button" class="toggle-upload-btn" id="toggle-to-upload-btn">
+                    📁 Upload Image Instead
+                </button>
+            </div>
+            <p id="requesting-camera" style="text-align: center; color: #666;">Requesting camera access...</p>
+        </div>
+
         <!-- Upload Area -->
-        <div class="upload-area" id="upload-area">
+        <div class="upload-area hidden" id="upload-area">
             <img id="preview-image" alt="Preview">
             <div id="upload-prompt">
                 <p style="font-size: 3rem; margin-bottom: 1rem;">📷</p>
                 <p style="margin-bottom: 1rem;">Drag & drop an image here, or click to select</p>
                 <button type="button" class="upload-btn" onclick="document.getElementById('image-upload').click()">
                     Choose Image
+                </button>
+                <button type="button" class="upload-btn" id="toggle-to-webcam-btn" style="background: #6c757d; margin-top: 1rem;">
+                    🎥 Use Webcam Instead
                 </button>
             </div>
             <input type="file" id="image-upload" class="upload-input" accept="image/jpeg,image/jpg,image/png,image/gif">
@@ -318,6 +421,16 @@
     const canvas = document.getElementById('preview-canvas');
     const ctx = canvas.getContext('2d');
 
+    // Webcam elements
+    const webcamArea = document.getElementById('webcam-area');
+    const videoStream = document.getElementById('video-stream');
+    const webcamControls = document.getElementById('webcam-controls');
+    const capturePhotoBtn = document.getElementById('capture-photo-btn');
+    const toggleToUploadBtn = document.getElementById('toggle-to-upload-btn');
+    const toggleToWebcamBtn = document.getElementById('toggle-to-webcam-btn');
+    const camerPermissionError = document.getElementById('camera-permission-error');
+    const requestingCamera = document.getElementById('requesting-camera');
+
     let selectedFile = null;
     let selectedOverlayId = null;
     let selectedOverlayImage = null;
@@ -331,6 +444,105 @@
     let dragStartX = 0;
     let dragStartY = 0;
     const resizeHandleSize = 12;
+    
+    // Webcam state
+    let mediaStream = null;
+    let useWebcam = true;  // Start with webcam by default
+
+    // Initialize webcam on page load
+    async function initializeWebcam() {
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user' },
+                audio: false
+            });
+            
+            videoStream.srcObject = mediaStream;
+            videoStream.style.display = 'block';
+            webcamControls.style.display = 'flex';
+            requestingCamera.style.display = 'none';
+            camerPermissionError.style.display = 'none';
+            useWebcam = true;
+        } catch (error) {
+            console.error('Camera access denied or unavailable:', error);
+            camerPermissionError.style.display = 'block';
+            requestingCamera.style.display = 'none';
+            videoStream.style.display = 'none';
+            webcamControls.style.display = 'none';
+            // Show upload area as fallback
+            setTimeout(() => {
+                switchToUpload();
+            }, 2000);
+        }
+    }
+
+    // Capture photo from webcam
+    function capturePhotoFromWebcam() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = videoStream.videoWidth;
+        tempCanvas.height = videoStream.videoHeight;
+        
+        if (tempCanvas.width === 0 || tempCanvas.height === 0) {
+            showAlert('Video not ready. Please wait a moment and try again.', 'error');
+            return;
+        }
+
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(videoStream, 0, 0);
+
+        // Stop video stream and hide webcam area
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+        webcamArea.classList.add('hidden');
+
+        // Convert canvas to blob and create file
+        tempCanvas.toBlob((blob) => {
+            const file = new File([blob], 'webcam-photo.jpg', { type: 'image/jpeg' });
+            handleFileSelect(file);
+        }, 'image/jpeg', 0.95);
+    }
+
+    // Switch to upload mode
+    function switchToUpload() {
+        useWebcam = false;
+        webcamArea.classList.add('hidden');
+        uploadArea.classList.remove('hidden');
+        
+        // Clear inline styles to let CSS take over
+        uploadArea.style.display = '';
+        uploadPrompt.style.display = '';
+        canvasContainer.style.display = 'none'; // Hide canvas if visible
+        
+        // Stop video stream
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+    }
+
+    // Switch to webcam mode
+    async function switchToWebcam() {
+        useWebcam = true;
+        uploadArea.classList.add('hidden');
+        webcamArea.classList.remove('hidden');
+        
+        // Reset form when switching back
+        selectedFile = null;
+        baseImageData = null;
+        cachedBaseImage = null;
+        imageUpload.value = '';
+        canvasContainer.style.display = 'none';
+        
+        // Initialize webcam again
+        await initializeWebcam();
+    }
+
+    // Event listeners for webcam controls
+    capturePhotoBtn.addEventListener('click', capturePhotoFromWebcam);
+    toggleToUploadBtn.addEventListener('click', switchToUpload);
+    toggleToWebcamBtn.addEventListener('click', switchToWebcam);
 
     // Drag and drop functionality
     uploadArea.addEventListener('dragover', (e) => {
@@ -831,7 +1043,7 @@
 
                 if (data.success) {
                     showAlert('Image created successfully!', 'success');
-                    resetForm();
+                    await resetForm();
                     loadUserImages(); // Reload thumbnails
                 } else {
                     showAlert(data.error || 'Failed to create image', 'error');
@@ -848,7 +1060,7 @@
     });
 
     // Reset form
-    function resetForm() {
+    async function resetForm() {
         selectedFile = null;
         selectedOverlayId = null;
         selectedOverlayImage = null;
@@ -861,9 +1073,26 @@
         isDragging = false;
         isResizing = false;
         imageUpload.value = '';
-        uploadArea.style.display = 'block'; // Show upload area again
-        uploadPrompt.style.display = 'block'; // Show upload prompt again
         canvasContainer.style.display = 'none'; // Hide canvas
+        
+        // Clear any inline styles that might be blocking visibility
+        uploadArea.style.display = '';
+        uploadPrompt.style.display = '';
+        webcamArea.style.display = '';
+        
+        // Show appropriate area
+        if (useWebcam) {
+            uploadArea.classList.add('hidden');
+            webcamArea.classList.remove('hidden');
+            // Reinitialize webcam if stopped
+            if (!mediaStream) {
+                await initializeWebcam();
+            }
+        } else {
+            uploadArea.classList.remove('hidden');
+            uploadPrompt.style.display = 'block'; // Make sure upload prompt is visible
+            webcamArea.classList.add('hidden');
+        }
         
         document.querySelectorAll('.overlay-item').forEach(item => {
             item.classList.remove('selected');
@@ -945,4 +1174,7 @@
 
     // Load user images on page load
     loadUserImages();
+    
+    // Initialize webcam on page load
+    initializeWebcam();
 </script>
