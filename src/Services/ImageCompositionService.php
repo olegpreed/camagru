@@ -54,21 +54,43 @@ class ImageCompositionService
                 return ['success' => false, 'error' => 'Failed to load overlay image'];
             }
 
-            // Resize base image to standard size
-            $standardWidth = 800;
-            $standardHeight = 600;
-            $resizedBase = $this->resizeImage($baseImage, $standardWidth, $standardHeight);
+            // Get dimensions from loaded images
+            $baseWidth = imagesx($baseImage);
+            $baseHeight = imagesy($baseImage);
             
-            // Resize overlay - use custom size if provided, otherwise use original size
+            // Create a new image for the composition with same dimensions as base
+            $composedImage = imagecreatetruecolor($baseWidth, $baseHeight);
+            
+            // Initially disable alpha blending to copy base image cleanly
+            imagealphablending($composedImage, false);
+            imagesavealpha($composedImage, true);
+            
+            // Copy base image to composed image
+            imagecopy($composedImage, $baseImage, 0, 0, 0, 0, $baseWidth, $baseHeight);
+            
+            // Now enable alpha blending for the overlay
+            imagealphablending($composedImage, true);
+            
+            // Resize overlay to user-specified dimensions
+            $resizedOverlay = $overlayImage;
             if ($overlayWidth > 0 && $overlayHeight > 0) {
-                $resizedOverlay = $this->resizeImage($overlayImage, $overlayWidth, $overlayHeight);
-            } else {
-                $resizedOverlay = $overlayImage;
+                $resizedOverlay = imagecreatetruecolor($overlayWidth, $overlayHeight);
+                imagealphablending($resizedOverlay, false);
+                imagesavealpha($resizedOverlay, true);
+                
+                // Use imagecopyresampled for better quality
+                imagecopyresampled(
+                    $resizedOverlay,
+                    $overlayImage,
+                    0, 0, 0, 0,
+                    $overlayWidth, $overlayHeight,
+                    imagesx($overlayImage), imagesy($overlayImage)
+                );
             }
 
-            // Compose images with positioning
+            // Compose overlay with positioning using imagecopy with alpha blending enabled
             imagecopy(
-                $resizedBase,
+                $composedImage,
                 $resizedOverlay,
                 $overlayX,
                 $overlayY,
@@ -77,6 +99,9 @@ class ImageCompositionService
                 imagesx($resizedOverlay),
                 imagesy($resizedOverlay)
             );
+            
+            // Disable alpha blending before saving
+            imagealphablending($composedImage, false);
 
             // Generate unique filename
             $filename = $this->generateFilename();
@@ -90,13 +115,15 @@ class ImageCompositionService
             }
 
             // Save composed image
-            $saved = imagepng($resizedBase, $absolutePath, 9);
+            $saved = imagepng($composedImage, $absolutePath, 9);
 
             // Clean up
             imagedestroy($baseImage);
             imagedestroy($overlayImage);
-            imagedestroy($resizedBase);
-            imagedestroy($resizedOverlay);
+            imagedestroy($composedImage);
+            if ($resizedOverlay !== $overlayImage) {
+                imagedestroy($resizedOverlay);
+            }
 
             if (!$saved) {
                 return ['success' => false, 'error' => 'Failed to save composed image'];

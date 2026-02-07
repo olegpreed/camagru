@@ -379,20 +379,32 @@
         // Load image and show canvas
         const reader = new FileReader();
         reader.onload = async (e) => {
-            baseImageData = e.target.result;
-            uploadArea.style.display = 'none'; // Hide entire upload area
-            uploadPrompt.style.display = 'none';
+            const img = new Image();
+            img.onload = async () => {
+                // Validate image dimensions
+                const imgPixels = img.width * img.height;
+                if (img.width > 3000 || img.height > 3000 || imgPixels > 5000000) {
+                    showAlert(`Image too large (${img.width}x${img.height}). Maximum 3000x3000 pixels or 5 megapixels. Please upload a smaller image.`, 'error');
+                    imageUpload.value = '';
+                    return;
+                }
 
-            // Setup canvas and show it with base image
-            setupCanvas();
-            canvasContainer.style.display = 'block';
+                baseImageData = e.target.result;
+                uploadArea.style.display = 'none'; // Hide entire upload area
+                uploadPrompt.style.display = 'none';
 
-            // If overlay is already selected, load it
-            if (selectedOverlayId) {
-                await loadOverlayImage();
-            }
+                // Setup canvas and show it with base image
+                setupCanvas();
+                canvasContainer.style.display = 'block';
 
-            updateCaptureButton();
+                // If overlay is already selected, load it
+                if (selectedOverlayId) {
+                    await loadOverlayImage();
+                }
+
+                updateCaptureButton();
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -461,6 +473,8 @@
                         ctx.globalAlpha = 0.9;
                         ctx.drawImage(
                             selectedOverlayImage,
+                            overlayX,
+                            overlayY,
                             overlayWidth,
                             overlayHeight
                         );
@@ -479,20 +493,18 @@
                         // Draw resize handle at bottom-right corner
                         ctx.fillStyle = '#007bff';
                         ctx.fillRect(
-                            overlayX + overlayWidth - resizeHandleSize / 2,
-                            overlayY + overlayHeight - resizeHandleSize / 2,
+                            overlayX + overlayWidth - resizeHandleSize,
+                            overlayY + overlayHeight - resizeHandleSize,
                             resizeHandleSize,
                             resizeHandleSize
                         );
                         ctx.strokeStyle = '#ffffff';
                         ctx.lineWidth = 1;
                         ctx.strokeRect(
-                            overlayX + overlayWidth - resizeHandleSize / 2,
-                            overlayY + overlayHeight - resizeHandleSize / 2,
+                            overlayX + overlayWidth - resizeHandleSize,
+                            overlayY + overlayHeight - resizeHandleSize,
                             resizeHandleSize,
-                            resizeHandleSize,
-                            selectedOverlayImage.width,
-                            selectedOverlayImage.height
+                            resizeHandleSize
                         );
                     }
                     pendingRedraw = false;
@@ -775,19 +787,25 @@
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
-            console.log('Response data:', data);
+            const text = await response.text();
+            console.log('Response text:', text);
+            
+            try {
+                const data = JSON.parse(text);
+                console.log('Response data:', data);
 
-            if (data.success) {
-                showAlert('Image created successfully!', 'success');
-                resetForm();
-                loadUserImages(); // Reload thumbnails
-            } else {
-                showAlert(data.error || 'Failed to create image', 'error');
+                if (data.success) {
+                    showAlert('Image created successfully!', 'success');
+                    resetForm();
+                    loadUserImages(); // Reload thumbnails
+                } else {
+                    showAlert(data.error || 'Failed to create image', 'error');
+                }
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response was:', text);
+                showAlert('Server error: ' + parseError.message, 'error');
             }
-        } catch (error) {
-            showAlert('An error occurred: ' + error.message, 'error');
-            console.error('Image composition error:', error);
         } finally {
             loading.classList.remove('show');
             updateCaptureButton();
