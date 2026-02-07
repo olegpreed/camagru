@@ -68,6 +68,39 @@ class Image extends Model
     }
 
     /**
+     * Get paginated images with user information
+     *
+     * @param int $limit Number of images per page
+     * @param int $offset Starting position
+     * @return array
+     */
+    public function findAllWithUsersPaginated(int $limit = 15, int $offset = 0): array
+    {
+        $sql = "SELECT 
+                    i.id,
+                    i.filename,
+                    i.original_filename,
+                    i.created_at,
+                    u.id as user_id,
+                    u.username
+                FROM {$this->table} i
+                INNER JOIN users u ON i.user_id = u.id
+                ORDER BY i.created_at DESC
+                LIMIT :limit OFFSET :offset";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Failed to fetch paginated images: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Get all images for a specific user
      *
      * @param int $userId

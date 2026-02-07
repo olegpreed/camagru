@@ -99,9 +99,6 @@ class ImageController extends Controller
      */
     public function galleryAction(): void
     {
-        $imageModel = new Image();
-        $images = $imageModel->findAllWithUsers();
-
         $successMessage = '';
         if (isset($_GET['upload'])) {
             $successMessage = 'Image uploaded successfully!';
@@ -109,8 +106,31 @@ class ImageController extends Controller
 
         \Core\View::render('image/gallery', [
             'title' => 'Gallery - Camagru',
-            'images' => $images,
             'successMessage' => $successMessage
+        ]);
+    }
+
+    /**
+     * Get paginated images (AJAX endpoint)
+     */
+    public function getImagesAction(): void
+    {
+        header('Content-Type: application/json');
+
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        // Validate inputs
+        $limit = max(1, min($limit, 50)); // Between 1 and 50
+        $offset = max(0, $offset);
+
+        $imageModel = new Image();
+        $images = $imageModel->findAllWithUsersPaginated($limit, $offset);
+
+        echo json_encode([
+            'success' => true,
+            'images' => $images,
+            'count' => count($images)
         ]);
     }
 
