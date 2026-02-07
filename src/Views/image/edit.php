@@ -383,6 +383,11 @@
             img.onload = async () => {
                 // Validate image dimensions
                 const imgPixels = img.width * img.height;
+                if (img.width < 200 || img.height < 200) {
+                    showAlert(`Image too small (${img.width}x${img.height}). Minimum 200x200 pixels. Please upload a larger image.`, 'error');
+                    imageUpload.value = '';
+                    return;
+                }
                 if (img.width > 3000 || img.height > 3000 || imgPixels > 5000000) {
                     showAlert(`Image too large (${img.width}x${img.height}). Maximum 3000x3000 pixels or 5 megapixels. Please upload a smaller image.`, 'error');
                     imageUpload.value = '';
@@ -420,8 +425,38 @@
 
             img.onload = () => {
                 selectedOverlayImage = img;
-                overlayWidth = img.width;
-                overlayHeight = img.height;
+                
+                // Get base image dimensions
+                const baseWidth = canvas.width;
+                const baseHeight = canvas.height;
+                
+                // Start with overlay's natural dimensions
+                let newWidth = img.width;
+                let newHeight = img.height;
+                
+                // Check if overlay is larger than base image and scale down if needed
+                if (newWidth > baseWidth || newHeight > baseHeight) {
+                    // Calculate scale factor to fit within base image (80% for some padding)
+                    const maxWidth = baseWidth * 0.8;
+                    const maxHeight = baseHeight * 0.8;
+                    const scaleX = maxWidth / newWidth;
+                    const scaleY = maxHeight / newHeight;
+                    const scale = Math.min(scaleX, scaleY);
+                    
+                    newWidth = Math.floor(newWidth * scale);
+                    newHeight = Math.floor(newHeight * scale);
+                }
+                
+                overlayWidth = newWidth;
+                overlayHeight = newHeight;
+                
+                // Center the overlay on the base image
+                overlayX = Math.floor((baseWidth - overlayWidth) / 2);
+                overlayY = Math.floor((baseHeight - overlayHeight) / 2);
+                
+                // Redraw canvas with the overlay
+                redrawCanvas();
+                
                 resolve();
             };
 

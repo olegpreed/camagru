@@ -228,7 +228,14 @@ class ImageController extends Controller
             $imgHeight = $imageInfo[1];
             $imgPixels = $imgWidth * $imgHeight;
             
-            // Check dimensions against limits (should match ImageCompositionService limits)
+            // Check minimum dimensions
+            if ($imgWidth < 200 || $imgHeight < 200) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Image dimensions too small. Minimum 200x200 pixels. Your image is ' . $imgWidth . 'x' . $imgHeight]);
+                return;
+            }
+            
+            // Check maximum dimensions
             if ($imgWidth > 3000 || $imgHeight > 3000 || $imgPixels > 5000000) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => 'Image dimensions too large. Maximum 3000x3000 pixels or 5 megapixels. Your image is ' . $imgWidth . 'x' . $imgHeight]);
