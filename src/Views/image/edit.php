@@ -1108,19 +1108,41 @@
             const response = await fetch('/image/getUserImages');
             const data = await response.json();
 
+            thumbnailsGrid.innerHTML = '';
+            
             if (data.success && data.images.length > 0) {
-                thumbnailsGrid.innerHTML = data.images.map(image => `
-                    <div class="thumbnail-item" data-image-id="${image.id}">
-                        <img src="${image.url}" alt="User image">
-                        <button class="delete-btn" onclick="deleteImage(${image.id})">Delete</button>
-                    </div>
-                `).join('');
+                data.images.forEach(image => {
+                    const item = document.createElement('div');
+                    item.className = 'thumbnail-item';
+                    item.dataset.imageId = image.id;
+                    
+                    const img = document.createElement('img');
+                    img.src = image.url;
+                    img.alt = 'User image';
+                    
+                    const btn = document.createElement('button');
+                    btn.className = 'delete-btn';
+                    btn.textContent = 'Delete';
+                    btn.type = 'button';
+                    btn.addEventListener('click', () => deleteImage(image.id));
+                    
+                    item.appendChild(img);
+                    item.appendChild(btn);
+                    thumbnailsGrid.appendChild(item);
+                });
             } else {
-                thumbnailsGrid.innerHTML = '<div class="empty-state">No images yet. Create your first one!</div>';
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-state';
+                emptyDiv.textContent = data.success ? 'No images yet. Create your first one!' : 'Failed to load images';
+                thumbnailsGrid.appendChild(emptyDiv);
             }
         } catch (error) {
             console.error('Failed to load images:', error);
-            thumbnailsGrid.innerHTML = '<div class="empty-state">Failed to load images</div>';
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-state';
+            emptyDiv.textContent = 'Failed to load images';
+            thumbnailsGrid.innerHTML = '';
+            thumbnailsGrid.appendChild(emptyDiv);
         }
     }
 
@@ -1164,7 +1186,13 @@
     // Show alert message
     function showAlert(message, type) {
         const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-        alertContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        alertContainer.innerHTML = '';
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert ' + alertClass;
+        alertDiv.textContent = message;
+        
+        alertContainer.appendChild(alertDiv);
         
         // Auto-hide after 5 seconds
         setTimeout(() => {

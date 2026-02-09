@@ -481,25 +481,44 @@
 
     function renderComments(comments) {
         if (!comments || comments.length === 0) {
-            modalComments.innerHTML = '<div class="comment-content">No comments yet.</div>';
+            modalComments.innerHTML = '';
+            const noCommentsDiv = document.createElement('div');
+            noCommentsDiv.className = 'comment-content';
+            noCommentsDiv.textContent = 'No comments yet.';
+            modalComments.appendChild(noCommentsDiv);
             return;
         }
 
-        modalComments.innerHTML = comments.map(comment => {
+        modalComments.innerHTML = '';
+        comments.forEach(comment => {
             const date = new Date(comment.created_at);
             const formattedDate = date.toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
             });
-            return `
-                <div class="comment-item">
-                    <div class="comment-header">${comment.username}</div>
-                    <div class="comment-date">${formattedDate}</div>
-                    <div class="comment-content">${comment.content}</div>
-                </div>
-            `;
-        }).join('');
+            
+            const commentItem = document.createElement('div');
+            commentItem.className = 'comment-item';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'comment-header';
+            headerDiv.textContent = comment.username;
+            
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'comment-date';
+            dateDiv.textContent = formattedDate;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'comment-content';
+            contentDiv.textContent = comment.content;
+            
+            commentItem.appendChild(headerDiv);
+            commentItem.appendChild(dateDiv);
+            commentItem.appendChild(contentDiv);
+            
+            modalComments.appendChild(commentItem);
+        });
     }
 
     async function openModal(imageId) {
@@ -651,21 +670,32 @@
         const likeCount = image.like_count ?? 0;
         const commentCount = image.comment_count ?? 0;
 
-        div.innerHTML = `
-            <div class="gallery-image-container">
-                <img 
-                    src="/uploads/images/${image.filename}" 
-                    alt="${image.original_filename || 'Image'}"
-                    loading="lazy"
-                >
-            </div>
-            <div class="gallery-stats">
-                <span class="stat-like">❤️ ${likeCount}</span>
-                <span class="stat-comment">💬 ${commentCount}</span>
-            </div>
-        `;
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'gallery-image-container';
+        
+        const img = document.createElement('img');
+        img.src = '/uploads/images/' + image.filename;
+        img.alt = image.original_filename || 'Image';
+        img.loading = 'lazy';
+        imageContainer.appendChild(img);
+        
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'gallery-stats';
+        
+        const likeSpan = document.createElement('span');
+        likeSpan.className = 'stat-like';
+        likeSpan.textContent = '❤️ ' + likeCount;
+        
+        const commentSpan = document.createElement('span');
+        commentSpan.className = 'stat-comment';
+        commentSpan.textContent = '💬 ' + commentCount;
+        
+        statsDiv.appendChild(likeSpan);
+        statsDiv.appendChild(commentSpan);
+        
+        div.appendChild(imageContainer);
+        div.appendChild(statsDiv);
 
-        const imageContainer = div.querySelector('.gallery-image-container');
         imageContainer.addEventListener('click', () => openModal(image.id));
 
         return div;

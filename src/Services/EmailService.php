@@ -297,6 +297,7 @@ class EmailService
      */
     private function getVerificationEmailTemplate(string $username, string $verificationLink): string
     {
+        $safeUsername = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
         return "
         <!DOCTYPE html>
         <html>
@@ -310,7 +311,7 @@ class EmailService
         </head>
         <body>
             <div class='container'>
-                <h1>Welcome to Camagru, {$username}!</h1>
+                <h1>Welcome to Camagru, {$safeUsername}!</h1>
                 <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
                 <p>
                     <a href='{$verificationLink}' class='button'>Verify Email Address</a>
@@ -333,6 +334,7 @@ class EmailService
      */
     private function getPasswordResetEmailTemplate(string $username, string $resetLink): string
     {
+        $safeUsername = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
         return "
         <!DOCTYPE html>
         <html>
@@ -348,7 +350,7 @@ class EmailService
         <body>
             <div class='container'>
                 <h1>Password Reset Request</h1>
-                <p>Hi {$username},</p>
+                <p>Hi {$safeUsername},</p>
                 <p>We received a request to reset your Camagru password. Click the button below to proceed:</p>
                 <p>
                     <a href='{$resetLink}' class='button'>Reset Password</a>
