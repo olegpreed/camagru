@@ -52,4 +52,11 @@ class Session
 
         session_destroy();
     }
+
+    public static function regenerate(): void
+    {
+        self::start();
+        // Regenerate session ID and delete old session file to prevent session fixation
+        session_regenerate_id(true);
+    }
 }

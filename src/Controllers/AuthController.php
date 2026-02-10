@@ -106,7 +106,8 @@ class AuthController extends Controller
             'username' => $user['username'],
             'email' => $user['email'],
         ]);
-
+        // Regenerate session ID to prevent session fixation attacks
+        \Core\Session::regenerate();
         header('Location: /');
         exit;
     }
