@@ -3,8 +3,9 @@
 namespace Controllers;
 
 use Core\Controller;
-use Core\View;
 use Core\CSRF;
+use Core\RateLimiter;
+use Core\View;
 use Middleware\AuthMiddleware;
 use Models\User;
 use Services\EmailService;
@@ -74,6 +75,20 @@ class UserController extends Controller
         }
 
         if (!empty($errors)) {
+            View::render('auth/forgot_password', [
+                'title' => 'Forgot Password - Camagru',
+                'errors' => $errors,
+                'old' => $old
+            ]);
+            return;
+        }
+
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateKey = 'password_reset:' . strtolower($email) . '|' . $ip;
+        $limitInfo = RateLimiter::hit($rateKey, 3, 60 * 60);
+        if (!$limitInfo['allowed']) {
+            $retryMinutes = max(1, (int)ceil($limitInfo['retry_after'] / 60));
+            $errors['general'] = 'Too many password reset attempts. Please try again in ' . $retryMinutes . ' minute(s).';
             View::render('auth/forgot_password', [
                 'title' => 'Forgot Password - Camagru',
                 'errors' => $errors,

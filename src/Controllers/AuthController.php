@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Core\Controller;
+use Core\RateLimiter;
 use Core\View;
 use Middleware\AuthMiddleware;
 use Models\User;
@@ -77,6 +78,20 @@ class AuthController extends Controller
             return;
         }
 
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateKey = 'login:' . strtolower($login) . '|' . $ip;
+        $limitInfo = RateLimiter::hit($rateKey, 5, 15 * 60);
+        if (!$limitInfo['allowed']) {
+            $retryMinutes = max(1, (int)ceil($limitInfo['retry_after'] / 60));
+            $errors['general'] = 'Too many login attempts. Please try again in ' . $retryMinutes . ' minute(s).';
+            \Core\View::render('auth/login', [
+                'title' => 'Login - Camagru',
+                'errors' => $errors,
+                'old' => $old
+            ]);
+            return;
+        }
+
         $userModel = new \Models\User();
         $user = $userModel->findByLogin($login);
 
@@ -108,6 +123,7 @@ class AuthController extends Controller
         ]);
         // Regenerate session ID to prevent session fixation attacks
         \Core\Session::regenerate();
+        RateLimiter::clear($rateKey);
         header('Location: /');
         exit;
     }
