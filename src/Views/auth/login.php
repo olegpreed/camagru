@@ -7,6 +7,8 @@
 <?php endif; ?>
 
 <form method="POST" action="/auth/login" style="max-width: 400px;">
+    <?= \Core\CSRF::field() ?>
+    
     <div style="margin-bottom: 1rem;">
         <label for="login">Username or Email:</label><br>
         <input

@@ -46,6 +46,18 @@ class AuthController extends Controller
         $errors = [];
         $old = $_POST ?? [];
 
+        // CSRF verification
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (!\Core\CSRF::verify($csrfToken)) {
+            $errors['general'] = 'Invalid security token. Please try again.';
+            \Core\View::render('auth/login', [
+                'title' => 'Login - Camagru',
+                'errors' => $errors,
+                'old' => $old
+            ]);
+            return;
+        }
+
         $login = trim($_POST['login'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -101,6 +113,19 @@ class AuthController extends Controller
 
     public function logoutAction(): void
     {
+        // Only allow POST requests
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            header('Location: /');
+            exit;
+        }
+
+        // CSRF verification
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (!\Core\CSRF::verify($csrfToken)) {
+            header('Location: /');
+            exit;
+        }
+
         \Core\Session::destroy();
         header('Location: /');
         exit;
@@ -133,6 +158,19 @@ class AuthController extends Controller
     {
         $errors = [];
         $old = $_POST ?? [];
+
+        // CSRF verification
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (!\Core\CSRF::verify($csrfToken)) {
+            $errors['general'] = 'Invalid security token. Please try again.';
+            $data = [
+                'title' => 'Register - Camagru',
+                'errors' => $errors,
+                'old' => $old
+            ];
+            View::render('auth/register', $data);
+            return;
+        }
 
         // Get form data
         $username = trim($_POST['username'] ?? '');

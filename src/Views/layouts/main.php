@@ -62,7 +62,10 @@
                     <a href="/image/edit" style="color: white; text-decoration: none;">Create</a>
                     <a href="/user/profile" style="color: white; text-decoration: none;">Profile</a>
                     <span style="color: #ecf0f1;"><?= htmlspecialchars($user['username']) ?></span>
-                    <a href="/auth/logout" style="color: #ecf0f1; text-decoration: underline;">Logout</a>
+                    <form method="POST" action="/auth/logout" style="display: inline; margin: 0;">
+                        <?= \Core\CSRF::field() ?>
+                        <button type="submit" style="background: none; border: none; color: #ecf0f1; text-decoration: underline; cursor: pointer; font: inherit; padding: 0;">Logout</button>
+                    </form>
                 <?php else: ?>
                     <a href="/auth/login" style="color: #ecf0f1; text-decoration: underline;">Login</a>
                     <a href="/auth/register" style="color: #ecf0f1; text-decoration: underline;">Register</a>

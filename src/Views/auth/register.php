@@ -7,6 +7,8 @@
 <?php endif; ?>
 
 <form method="POST" action="/auth/register" style="max-width: 400px;">
+    <?= \Core\CSRF::field() ?>
+    
     <div style="margin-bottom: 1rem;">
         <label for="username">Username:</label><br>
         <input 
