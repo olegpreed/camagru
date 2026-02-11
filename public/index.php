@@ -5,6 +5,10 @@
  * All requests are routed through this file
  */
 
+// Set security headers
+header('X-Frame-Options: DENY');  // Prevent clickjacking
+header('X-Content-Type-Options: nosniff');  // Prevent MIME type sniffing
+
 // Load autoloader
 require_once __DIR__ . '/../src/Config/autoload.php';
 
