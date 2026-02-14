@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sofadi+One&display=swap" rel="stylesheet">
     <title><?= htmlspecialchars($title ?? 'Camagru') ?></title>
     <style>
         * {
@@ -12,38 +15,193 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Tahoma', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #d5d5d5;
+            background: url(
+				'/assets/images/body_bg.png');
+			background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
         }
         
+        /* Header Container */
         header {
-            background: #2c3e50;
-            color: white;
-            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
         }
         
-        header h1 {
-            font-size: 1.5rem;
+        .header-container {
+            max-width: 900px;
+            width: 100%;
         }
         
+        /* Top Header Bar */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: 
+			url('/assets/images/header_bg.png'), linear-gradient(0deg, #5585ff 0%, #3e78ff 100%);
+            background-size: 100% 100%, fill;
+            background-repeat: no-repeat;
+            background-blend-mode: soft-light;
+        }
+        
+        .site-logo {
+            color: #fff;
+            font-family: 'Sofadi One';
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .username {
+            color: #ffc0e0;
+            font-weight: bold;
+        }
+        
+        .user-actions a,
+        .user-actions button {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .user-actions a:hover {
+            color: #ffc0e0;
+            text-decoration: underline;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font: inherit;
+            padding: 0;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .logout-btn:hover {
+            color: #ffc0e0;
+            text-decoration: underline;
+        }
+        
+        /* Navigation Tabs */
+        .header-nav {
+            display: flex;
+			/* background: rgba(255, 255, 255, 0.5); */
+			border: 1px solid rgb(0, 0, 0);
+			/* border-top: none; */
+        }
+        
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 20px;
+            border-bottom: none;
+            text-decoration: underline;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .nav-tab:not(:first-child) {
+            border-left: none;
+        }
+        
+        .nav-tab.disabled {
+            color: rgb(108, 108, 108);
+            cursor: not-allowed;
+        }
+        
+        /* Main Content */
         main {
             flex: 1;
-            padding: 2rem;
-            max-width: 1200px;
+            max-width: 900px;
             width: 100%;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 0 20px;
         }
         
-        footer {
-            background: #34495e;
-            color: white;
+        .footer-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 15px 20px;
             text-align: center;
-            padding: 1rem;
-            margin-top: auto;
+        }
+        
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-badges img {
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .copyright {
+            color: #fff;
+            font-size: 11px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .header-nav {
+                flex-direction: column;
+                padding: 0;
+            }
+            
+            .nav-tab {
+                border: 1px solid #c084b1;
+                border-bottom: none;
+            }
+            
+            .nav-tab:last-child {
+                border-bottom: 1px solid #c084b1;
+            }
+            
+            main {
+                margin: 10px auto;
+                padding: 0 10px;
+            }
+            
+            .site-logo {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .user-actions {
+                font-size: 11px;
+                gap: 8px;
+            }
+            
+            .nav-tab {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -54,23 +212,32 @@
     $user = AuthMiddleware::user();
     ?>
     <header>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1><a href="/" style="color: white; text-decoration: none;">Camagru</a></h1>
-            <nav style="display: flex; gap: 1.5rem; align-items: center;">
-                <a href="/gallery" style="color: white; text-decoration: none;">Gallery</a>
-                <?php if ($user): ?>
-                    <a href="/image/edit" style="color: white; text-decoration: none;">Create</a>
-                    <a href="/user/profile" style="color: white; text-decoration: none;">Profile</a>
-                    <span style="color: #ecf0f1;"><?= htmlspecialchars($user['username']) ?></span>
-                    <form method="POST" action="/auth/logout" style="display: inline; margin: 0;">
-                        <?= \Core\CSRF::field() ?>
-                        <button type="submit" style="background: none; border: none; color: #ecf0f1; text-decoration: underline; cursor: pointer; font: inherit; padding: 0;">Logout</button>
-                    </form>
-                <?php else: ?>
-                    <a href="/auth/login" style="color: #ecf0f1; text-decoration: underline;">Login</a>
-                    <a href="/auth/register" style="color: #ecf0f1; text-decoration: underline;">Register</a>
-                <?php endif; ?>
-            </nav>
+        <div class="header-container">
+            <!-- Top Bar: Logo and User Actions -->
+            <div class="header-top">
+                <a href="/" class="site-logo">WebSnap.com</a>
+                <div class="user-actions">
+                    <?php if ($user): ?>
+                        <span class="username"><?= htmlspecialchars($user['username']) ?></span>
+                        <span>|</span>
+                        <form method="POST" action="/auth/logout" style="display: inline; margin: 0;">
+                            <?= \Core\CSRF::field() ?>
+                            <button type="submit" class="logout-btn">Logout ➜</button>
+                        </form>
+                    <?php else: ?>
+                        <a href="/auth/login">Login</a>
+                        <span>|</span>
+                        <a href="/auth/register">Register</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="header-nav">
+                <a href="/gallery" class="nav-tab">Gallery</a>
+                <a href="<?= $user ? '/image/edit' : '#' ?>" class="nav-tab <?= $user ? '' : 'disabled' ?>">Create</a>
+                <a href="<?= $user ? '/user/profile' : '#' ?>" class="nav-tab <?= $user ? '' : 'disabled' ?>">Profile</a>
+            </div>
         </div>
     </header>
     
@@ -79,7 +246,24 @@
     </main>
     
     <footer>
-        <p>&copy; <?= date('Y') ?> Camagru. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-badges">
+                <a href="https://www.php.net/" target="_blank" rel="noopener noreferrer">
+                    <img src="https://cyber.dabamos.de/88x31/php4_88x31.gif" alt="PHP" width="88" height="31">
+                </a>
+                <a href="https://www.mozilla.org/firefox/" target="_blank" rel="noopener noreferrer">
+                    <img src="https://cyber.dabamos.de/88x31/firefox3.gif" alt="Firefox" width="88" height="31">
+                </a>
+                <a href="https://github.com/olegpreed" target="_blank" rel="noopener noreferrer">
+                    <img src="	https://cyber.dabamos.de/88x31/github.gif" alt="GitHub" width="88" height="31">
+                </a>
+                <img src="https://cyber.dabamos.de/88x31/html3_s1.gif" alt="HTML" width="88" height="31">
+                <a href="https://www.42bangkok.com/" target="_blank" rel="noopener noreferrer">
+                    <img src="https://cyber.dabamos.de/88x31/es-88x31.gif" alt="42 Bangkok" width="88" height="31">
+                </a>
+            </div>
+            <p class="copyright">&copy; <?= date('Y') ?> Camagru. All rights reserved.</p>
+        </div>
     </footer>
 </body>
 </html>
