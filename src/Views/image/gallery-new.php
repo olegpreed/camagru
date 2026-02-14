@@ -68,7 +68,8 @@
     .gallery-item-content {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        height: 400px;
+        min-height: 400px;
+        max-height: 600px;
     }
 
     .gallery-image-section {
@@ -78,7 +79,6 @@
         justify-content: center;
         position: relative;
         overflow: hidden;
-        aspect-ratio: 1;
     }
 
     .gallery-image-section img {
@@ -98,7 +98,6 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        overflow: hidden;
     }
 
     .gallery-header {
@@ -354,17 +353,17 @@
     @media (max-width: 768px) {
         .gallery-item-content {
             grid-template-columns: 1fr;
-            height: auto;
+            min-height: auto;
+            max-height: none;
         }
 
         .gallery-image-section {
             aspect-ratio: 1;
-            height: auto;
+            min-height: 300px;
         }
 
         .gallery-info-section {
-            max-height: 350px;
-            overflow: hidden;
+            min-height: 400px;
         }
 
         .lightbox-container {
@@ -379,7 +378,7 @@
 
         .gallery-info-section {
             padding: 1rem;
-            max-height: 300px;
+            min-height: 350px;
         }
 
         .gallery-actions {
@@ -421,19 +420,6 @@
         }
         const data = await response.json();
         return data.csrf_token;
-    }
-
-    async function loadImageComments(imageId, commentsList) {
-        try {
-            const response = await fetch(`/image/getImageDetails?id=${imageId}`);
-            const data = await response.json();
-
-            if (data.success) {
-                renderComments(commentsList, data.comments);
-            }
-        } catch (error) {
-            console.error('Failed to load comments:', error);
-        }
     }
 
     async function toggleLike(imageId, button, likeCount, commentCount) {
@@ -624,8 +610,7 @@
         const commentsList = document.createElement('div');
         commentsList.className = 'comments-list';
 
-        renderComments(commentsList, []); // Show empty initially
-        loadImageComments(image.id, commentsList); // Fetch comments async
+        renderComments(commentsList, image.comments || []);
 
         // Comment form
         const form = document.createElement('div');
