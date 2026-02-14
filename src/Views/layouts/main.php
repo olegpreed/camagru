@@ -74,11 +74,14 @@
             font-weight: bold;
         }
         
+        .user-actions span {
+            color: #fff;
+        }
+        
         .user-actions a,
         .user-actions button {
             color: #fff;
             text-decoration: none;
-            transition: color 0.2s;
         }
         
         .user-actions a:hover {
