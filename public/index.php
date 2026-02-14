@@ -22,8 +22,8 @@ Session::start();
 $router = new Router();
 
 // Define routes
-$router->add('', ['controller' => 'Home', 'action' => 'index']);
-$router->add('/', ['controller' => 'Home', 'action' => 'index']);
+$router->add('', ['controller' => 'Image', 'action' => 'gallery']);
+$router->add('/', ['controller' => 'Image', 'action' => 'gallery']);
 $router->add('home', ['controller' => 'Home', 'action' => 'index']);
 
 // Authentication routes
