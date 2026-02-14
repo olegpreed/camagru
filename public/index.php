@@ -24,7 +24,6 @@ $router = new Router();
 // Define routes
 $router->add('', ['controller' => 'Image', 'action' => 'gallery']);
 $router->add('/', ['controller' => 'Image', 'action' => 'gallery']);
-$router->add('home', ['controller' => 'Home', 'action' => 'index']);
 
 // Authentication routes
 $router->add('auth/register', ['controller' => 'Auth', 'action' => 'register']);
@@ -50,7 +49,6 @@ $router->add('image/getImageDetails', ['controller' => 'Image', 'action' => 'get
 $router->add('image/toggleLike', ['controller' => 'Image', 'action' => 'toggleLike']);
 $router->add('image/addComment', ['controller' => 'Image', 'action' => 'addComment']);
 $router->add('image/delete', ['controller' => 'Image', 'action' => 'delete']);
-$router->add('image/upload', ['controller' => 'Image', 'action' => 'upload']);
 $router->add('gallery', ['controller' => 'Image', 'action' => 'gallery']);
 
 // Get the URL path

@@ -1,15 +1,5 @@
 <div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2>Image Gallery</h2>
-        <?php 
-        use Middleware\AuthMiddleware;
-        $currentUser = AuthMiddleware::user();
-        if ($currentUser): 
-        ?>
-            <a href="/image/upload" style="background: #2c3e50; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 5px;">
-                Upload Image
-            </a>
-        <?php endif; ?>
     </div>
 
     <?php if (!empty($successMessage)): ?>
@@ -22,21 +12,8 @@
         <!-- Gallery items will be loaded here -->
     </div>
 
-    <div id="empty-gallery" style="text-align: center; padding: 3rem; background: #f8f9fa; border-radius: 8px; display: none;">
-        <p style="font-size: 1.2rem; color: #666;">No images uploaded yet.</p>
-        <?php if ($currentUser): ?>
-            <p style="margin-top: 1rem;">
-                <a href="/image/edit" style="color: #2c3e50; text-decoration: underline;">
-                    Be the first to create an image!
-                </a>
-            </p>
-        <?php else: ?>
-            <p style="margin-top: 1rem;">
-                <a href="/auth/login" style="color: #2c3e50; text-decoration: underline;">
-                    Login to create images
-                </a>
-            </p>
-        <?php endif; ?>
+    <div id="empty-gallery" style="text-align: center; padding: 3rem; display: none;">
+        <p style="font-size: 1.2rem; color: #666;">No images uploaded yet ;(</p>
     </div>
 
     <div id="loading-indicator" style="text-align: center; padding: 2rem; display: none;">
@@ -68,7 +45,8 @@
     .gallery-item-content {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        height: 400px;
+        min-height: 400px;
+        max-height: 600px;
     }
 
     .gallery-image-section {
@@ -78,7 +56,6 @@
         justify-content: center;
         position: relative;
         overflow: hidden;
-        aspect-ratio: 1;
     }
 
     .gallery-image-section img {
@@ -98,7 +75,6 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        overflow: hidden;
     }
 
     .gallery-header {
@@ -266,7 +242,6 @@
         padding: 0.5rem 1rem;
         cursor: pointer;
         font-weight: 600;
-        transition: background 0.2s;
     }
 
     .comment-btn:hover:not(:disabled) {
@@ -354,17 +329,17 @@
     @media (max-width: 768px) {
         .gallery-item-content {
             grid-template-columns: 1fr;
-            height: auto;
+            min-height: auto;
+            max-height: none;
         }
 
         .gallery-image-section {
             aspect-ratio: 1;
-            height: auto;
+            min-height: 300px;
         }
 
         .gallery-info-section {
-            max-height: 350px;
-            overflow: hidden;
+            min-height: 400px;
         }
 
         .lightbox-container {
@@ -379,7 +354,7 @@
 
         .gallery-info-section {
             padding: 1rem;
-            max-height: 300px;
+            min-height: 350px;
         }
 
         .gallery-actions {
@@ -398,7 +373,6 @@
 </style>
 
 <script>
-    const isLoggedIn = <?= $currentUser ? 'true' : 'false' ?>;
     const galleryContainer = document.getElementById('gallery-container');
     const emptyGallery = document.getElementById('empty-gallery');
     const loadingIndicator = document.getElementById('loading-indicator');
@@ -421,19 +395,6 @@
         }
         const data = await response.json();
         return data.csrf_token;
-    }
-
-    async function loadImageComments(imageId, commentsList) {
-        try {
-            const response = await fetch(`/image/getImageDetails?id=${imageId}`);
-            const data = await response.json();
-
-            if (data.success) {
-                renderComments(commentsList, data.comments);
-            }
-        } catch (error) {
-            console.error('Failed to load comments:', error);
-        }
     }
 
     async function toggleLike(imageId, button, likeCount, commentCount) {
@@ -624,8 +585,7 @@
         const commentsList = document.createElement('div');
         commentsList.className = 'comments-list';
 
-        renderComments(commentsList, []); // Show empty initially
-        loadImageComments(image.id, commentsList); // Fetch comments async
+        renderComments(commentsList, image.comments || []);
 
         // Comment form
         const form = document.createElement('div');
