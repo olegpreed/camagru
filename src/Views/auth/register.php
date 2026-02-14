@@ -1,109 +1,108 @@
-<div style="display: flex; gap: 3rem; align-items: flex-start;">
+<div class="auth-container">
     <!-- Left Column: Register Form -->
-    <div style="flex: 1; max-width: 400px;">
-        <h2 style="margin-bottom: 1.5rem;">Create an Account</h2>
+    <div class="auth-form-column">
+        <h2>Create an Account</h2>
 
         <?php if (isset($errors['general'])): ?>
-            <div style="color: red; margin-bottom: 1rem;">
+            <div class="auth-general-error">
                 <?= htmlspecialchars($errors['general']) ?>
             </div>
         <?php endif; ?>
 
         <form method="POST" action="/auth/register">
-    <?= \Core\CSRF::field() ?>
-    
-    <div style="margin-bottom: 1rem;">
-        <label for="username">Username:</label><br>
-        <input 
-            type="text" 
-            id="username" 
-            name="username" 
-            value="<?= htmlspecialchars($old['username'] ?? '') ?>"
-            required
-            style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;"
-        >
-        <?php if (isset($errors['username'])): ?>
-            <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
-                <?= htmlspecialchars($errors['username']) ?>
+            <?= \Core\CSRF::field() ?>
+            
+            <div class="auth-form-group">
+                <label for="username">Username:</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    value="<?= htmlspecialchars($old['username'] ?? '') ?>"
+                    required
+                >
+                <?php if (isset($errors['username'])): ?>
+                    <div class="field-error">
+                        <?= htmlspecialchars($errors['username']) ?>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
 
-    <div style="margin-bottom: 1rem;">
-        <label for="email">Email:</label><br>
-        <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            value="<?= htmlspecialchars($old['email'] ?? '') ?>"
-            required
-            style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;"
-        >
-        <?php if (isset($errors['email'])): ?>
-            <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
-                <?= htmlspecialchars($errors['email']) ?>
+            <div class="auth-form-group">
+                <label for="email">Email:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                    required
+                >
+                <?php if (isset($errors['email'])): ?>
+                    <div class="field-error">
+                        <?= htmlspecialchars($errors['email']) ?>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
 
-    <div style="margin-bottom: 1rem;">
-        <label for="password">Password:</label><br>
-        <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            required
-            style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;"
-        >
-        <?php if (isset($errors['password'])): ?>
-            <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
-                <?= htmlspecialchars($errors['password']) ?>
+            <div class="auth-form-group">
+                <label for="password">Password:</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required
+                >
+                <?php if (isset($errors['password'])): ?>
+                    <div class="field-error">
+                        <?= htmlspecialchars($errors['password']) ?>
+                    </div>
+                <?php endif; ?>
+                <span class="field-help">
+                    Must be at least 8 characters with uppercase, lowercase, and number
+                </span>
             </div>
-        <?php endif; ?>
-        <small style="color: #666; font-size: 0.875rem;">
-            Must be at least 8 characters with uppercase, lowercase, and number
-        </small>
-    </div>
 
-    <div style="margin-bottom: 1rem;">
-        <label for="password_confirm">Confirm Password:</label><br>
-        <input 
-            type="password" 
-            id="password_confirm" 
-            name="password_confirm" 
-            required
-            style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;"
-        >
-        <?php if (isset($errors['password_confirm'])): ?>
-            <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
-                <?= htmlspecialchars($errors['password_confirm']) ?>
+            <div class="auth-form-group">
+                <label for="password_confirm">Confirm Password:</label>
+                <input 
+                    type="password" 
+                    id="password_confirm" 
+                    name="password_confirm" 
+                    required
+                >
+                <?php if (isset($errors['password_confirm'])): ?>
+                    <div class="field-error">
+                        <?= htmlspecialchars($errors['password_confirm']) ?>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
 
-    <button type="submit" style="width: 100%; padding: 0.75rem; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Register
-    </button>
-</form>
-
-        <p style="margin-top: 1rem;">
-            Already have an account? <a href="/auth/login">Log in here</a>
-        </p>
+            <button type="submit">
+                Register
+            </button>
+        </form>
+        
+        <div class="auth-form-links">
+            <p>
+                Already have an account? <a href="/auth/login">Log in here</a>
+            </p>
+        </div>
     </div>
 
     <!-- Right Column: Website Information -->
-    <div style="flex: 1; padding: 2rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
-        <h3 style="margin-bottom: 1rem; color: #ffc0e0;">Join WebSnap.com Today</h3>
-        <p style="margin-bottom: 1rem; line-height: 1.8;">
-            Create an account and start sharing your creative photos with our community.
+    <div class="auth-info-column">
+        <img src="/assets/images/people.png" alt="Community" class="auth-info-image">
+        <h3>Welcome to WebSnap.com</h3>
+        <p>
+            Join our creative community and share your moments with photo enthusiasts from around the world.
         </p>
-        <h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem; color: #ffc0e0;">What You Get:</h4>
-        <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 0.5rem;">🎯 Your personal gallery</li>
-            <li style="margin-bottom: 0.5rem;">🛠️ Advanced editing tools</li>
-            <li style="margin-bottom: 0.5rem;">💬 Engage with the community</li>
-            <li style="margin-bottom: 0.5rem;">🔒 Secure & private profile</li>
-            <li style="margin-bottom: 0.5rem;">⭐ Showcase your work</li>
+        <h4>Features:</h4>
+        <ul>
+            <li>Capture and edit photos</li>
+            <li>Add creative overlays</li>
+            <li>Like and comment on photos</li>
+            <li>Connect with other creators</li>
+            <li>Express yourself</li>
         </ul>
     </div>
 </div>

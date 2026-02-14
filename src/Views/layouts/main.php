@@ -6,6 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sofadi+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/auth.css">
     <title><?= htmlspecialchars($title ?? 'Camagru') ?></title>
     <style>
         * {
@@ -16,13 +17,14 @@
         
         body {
             font-family: 'Tahoma', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
-            line-height: 1.6;
-            color: #d5d5d5;
+            /* line-height: 1.6; */
+            /* color: #d5d5d5; */
             background: url(
 				'/assets/images/body_bg.png');
 			background-size: cover;
             background-attachment: fixed;
             min-height: 100vh;
+			font-size: 13px;
             display: flex;
             flex-direction: column;
         }
@@ -132,8 +134,7 @@
             flex: 1;
             max-width: 900px;
             width: 100%;
-            margin: 20px auto;
-            padding: 0 20px;
+            margin: 10px auto;
         }
         
         .footer-container {
