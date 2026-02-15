@@ -1,12 +1,12 @@
 <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <?php 
+        use Middleware\AuthMiddleware;
+        $currentUser = AuthMiddleware::user();
+        if ($currentUser): 
+        ?>
+        <?php endif; ?>
     </div>
-
-    <?php if (!empty($successMessage)): ?>
-        <div style="background: #27ae60; color: white; padding: 1rem; border-radius: 5px; margin-bottom: 2rem;">
-            <?= htmlspecialchars($successMessage) ?>
-        </div>
-    <?php endif; ?>
 
     <div id="gallery-container" style="display: flex; flex-direction: column; gap: 2rem; margin: 0 auto;">
         <!-- Gallery items will be loaded here -->
@@ -14,6 +14,19 @@
 
     <div id="empty-gallery" style="text-align: center; padding: 3rem; display: none;">
         <p style="font-size: 1.2rem; color: #666;">No images uploaded yet ;(</p>
+        <?php if ($currentUser): ?>
+            <p style="margin-top: 1rem;">
+                <a href="/image/edit" style="color: #2c3e50; text-decoration: underline;">
+                    Be the first to create an image!
+                </a>
+            </p>
+        <?php else: ?>
+            <p style="margin-top: 1rem;">
+                <a href="/auth/login" style="color: #2c3e50; text-decoration: underline;">
+                    Login to create images
+                </a>
+            </p>
+        <?php endif; ?>
     </div>
 
     <div id="loading-indicator" style="text-align: center; padding: 2rem; display: none;">
@@ -36,26 +49,31 @@
 
 <style>
     .gallery-item-wrapper {
-        background: white;
-        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		border: 1px solid rgb(0, 0, 0);
+		max-width: 900px;
+		aspect-ratio: 2 / 1;
     }
 
     .gallery-item-content {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        min-height: 400px;
-        max-height: 600px;
+        height: 100%;
     }
 
     .gallery-image-section {
-        background: #f0f0f0;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
         overflow: hidden;
+		/* border: 1px solid rgb(0, 0, 0); */
+		padding: 1rem;
+		/* background: rgb(229, 229, 229); */
+		width: 100%;
+		/* box-shadow: 2px 2px 1px rgba(0,0,0,0.4); */
+        aspect-ratio: 1;
     }
 
     .gallery-image-section img {
@@ -63,11 +81,6 @@
         height: 100%;
         object-fit: cover;
         cursor: pointer;
-        transition: transform 0.2s;
-    }
-
-    .gallery-image-section img:hover {
-        transform: scale(1.02);
     }
 
     .gallery-info-section {
@@ -75,6 +88,7 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+		min-height: 0;
     }
 
     .gallery-header {
@@ -102,39 +116,57 @@
     }
 
     .gallery-actions {
+        display: none;
+    }
+
+    /* Like button on image - entire badge is clickable */
+    .image-like-badge {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 6px 10px;
         display: flex;
-        gap: 0.75rem;
         align-items: center;
-    }
-
-    .like-btn {
-        background: #f1f3f5;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 12px;
-        cursor: pointer;
-        font-weight: 600;
+        gap: 6px;
+        z-index: 10;
         transition: all 0.2s;
+        border: none;
+        cursor: pointer;
     }
 
-    .like-btn:hover {
-        background: #e9ecef;
-    }
-
-    .like-btn.active {
-        background: #ffe3e3;
-        color: #c92a2a;
-    }
-
-    .like-btn:disabled {
-        opacity: 0.6;
+    .image-like-badge:disabled {
+        opacity: 0.7;
         cursor: not-allowed;
     }
 
-    .stat-count {
-        color: #5f6b77;
+    .image-like-badge.active {
+        background: rgba(52, 152, 219, 0.95);
+    }
+
+    .image-like-badge.active .image-like-count {
+        color: white;
+    }
+
+    .image-like-badge img {
+        transition: transform 0.2s;
+    }
+
+    .image-like-badge:hover:not(:disabled) img {
+        transform: translateY(-2px);
+    }
+
+    .image-like-count {
         font-weight: 600;
         font-size: 0.9rem;
+        min-width: 20px;
+        color: #2c3e50;
+    }
+
+
+
+    .stat-count {
+        display: none;
     }
 
     .comments-section {
@@ -152,6 +184,7 @@
         flex-direction: column;
         gap: 0.75rem;
         padding-right: 0.5rem;
+		min-height: 0;
     }
 
     .comments-list::-webkit-scrollbar {
@@ -235,17 +268,8 @@
     }
 
     .comment-btn {
-        background: #2c3e50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
+        padding: 0.2rem 0.5rem;
         cursor: pointer;
-        font-weight: 600;
-    }
-
-    .comment-btn:hover:not(:disabled) {
-        background: #34495e;
     }
 
     .comment-btn:disabled {
@@ -327,6 +351,10 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
+        .gallery-item-wrapper {
+            aspect-ratio: auto;
+        }
+
         .gallery-item-content {
             grid-template-columns: 1fr;
             min-height: auto;
@@ -373,6 +401,7 @@
 </style>
 
 <script>
+    const isLoggedIn = <?= $currentUser ? 'true' : 'false' ?>;
     const galleryContainer = document.getElementById('gallery-container');
     const emptyGallery = document.getElementById('empty-gallery');
     const loadingIndicator = document.getElementById('loading-indicator');
@@ -397,7 +426,20 @@
         return data.csrf_token;
     }
 
-    async function toggleLike(imageId, button, likeCount, commentCount) {
+    async function loadImageComments(imageId, commentsList) {
+        try {
+            const response = await fetch(`/image/getImageDetails?id=${imageId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                renderComments(commentsList, data.comments);
+            }
+        } catch (error) {
+            console.error('Failed to load comments:', error);
+        }
+    }
+
+    async function toggleLike(imageId, button, likeCountSpan, badge) {
         if (!isLoggedIn) return;
 
         try {
@@ -416,11 +458,15 @@
                 throw new Error(data.error || 'Failed to toggle like');
             }
 
-            button.classList.toggle('active');
-            const countSpan = button.nextElementSibling;
-            if (countSpan) {
-                countSpan.textContent = `❤️ ${data.count}`;
+            // Set the active state based on server response
+            if (data.liked) {
+                button.classList.add('active');
+                badge.classList.add('active');
+            } else {
+                button.classList.remove('active');
+                badge.classList.remove('active');
             }
+            likeCountSpan.textContent = data.count;
         } catch (error) {
             console.error('Like error:', error);
         }
@@ -450,9 +496,6 @@
             remainingSpan.textContent = '500';
             
             renderComments(commentsContainer, data.comments);
-            if (commentCountSpan) {
-                commentCountSpan.textContent = `💬 ${data.comment_count}`;
-            }
         } catch (error) {
             console.error('Comment error:', error);
         }
@@ -523,6 +566,32 @@
             lightbox.setAttribute('aria-hidden', 'false');
         });
 
+        // Like badge on image (entire badge is clickable)
+        const likeBadge = document.createElement('button');
+        likeBadge.className = 'image-like-badge' + (image.liked_by_user ? ' active' : '');
+        likeBadge.type = 'button';
+        likeBadge.disabled = !isLoggedIn;
+
+        const likeCount = document.createElement('span');
+        likeCount.className = 'image-like-count';
+        likeCount.textContent = image.like_count ?? 0;
+
+        const thumbImg = document.createElement('img');
+        thumbImg.src = '/assets/images/thumbs.png';
+        thumbImg.alt = 'Like';
+        thumbImg.style.width = '20px';
+        thumbImg.style.height = '20px';
+
+        likeBadge.appendChild(likeCount);
+        likeBadge.appendChild(thumbImg);
+
+        likeBadge.addEventListener('click', () => {
+            toggleLike(image.id, likeBadge, likeCount, likeBadge);
+        });
+
+        // Add like badge to image section
+        imageSection.appendChild(likeBadge);
+
         // Info section
         const infoSection = document.createElement('div');
         infoSection.className = 'gallery-info-section';
@@ -557,27 +626,6 @@
         const actions = document.createElement('div');
         actions.className = 'gallery-actions';
 
-        const likeBtn = document.createElement('button');
-        likeBtn.className = 'like-btn' + (image.liked_by_user ? ' active' : '');
-        likeBtn.textContent = '❤️ Like';
-        likeBtn.disabled = !isLoggedIn;
-
-        const likeCount = document.createElement('span');
-        likeCount.className = 'stat-count';
-        likeCount.textContent = `❤️ ${image.like_count ?? 0}`;
-
-        const commentCount = document.createElement('span');
-        commentCount.className = 'stat-count';
-        commentCount.textContent = `💬 ${image.comment_count ?? 0}`;
-
-        actions.appendChild(likeBtn);
-        actions.appendChild(likeCount);
-        actions.appendChild(commentCount);
-
-        likeBtn.addEventListener('click', () => {
-            toggleLike(image.id, likeBtn, image.like_count, image.comment_count);
-        });
-
         // Comments section
         const commentsSection = document.createElement('div');
         commentsSection.className = 'comments-section';
@@ -586,6 +634,7 @@
         commentsList.className = 'comments-list';
 
         renderComments(commentsList, image.comments || []);
+        loadImageComments(image.id, commentsList);
 
         // Comment form
         const form = document.createElement('div');
@@ -615,7 +664,7 @@
         });
 
         submitBtn.addEventListener('click', () => {
-            addComment(image.id, textarea.value, textarea, remaining, commentsList, likeBtn, commentCount);
+            addComment(image.id, textarea.value, textarea, remaining, commentsList, likeBtn);
         });
 
         let loginHint = null;
@@ -639,7 +688,6 @@
         }
 
         infoSection.appendChild(header);
-        infoSection.appendChild(actions);
         infoSection.appendChild(commentsSection);
 
         content.appendChild(imageSection);

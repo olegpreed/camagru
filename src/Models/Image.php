@@ -74,7 +74,7 @@ class Image extends Model
      * @param int $offset Starting position
      * @return array
      */
-    public function findAllWithUsersPaginated(int $limit = 15, int $offset = 0): array
+    public function findAllWithUsersPaginated(int $limit = 15, int $offset = 0, ?int $userId = null): array
     {
         $sql = "SELECT 
                     i.id,
@@ -84,8 +84,17 @@ class Image extends Model
                     u.id as user_id,
                     u.username,
                     (SELECT COUNT(*) FROM likes l WHERE l.image_id = i.id) as like_count,
-                    (SELECT COUNT(*) FROM comments c WHERE c.image_id = i.id) as comment_count
-                FROM {$this->table} i
+                    (SELECT COUNT(*) FROM comments c WHERE c.image_id = i.id) as comment_count";
+        
+        if ($userId) {
+            $sql .= ",
+                    (SELECT COUNT(*) FROM likes l WHERE l.image_id = i.id AND l.user_id = :user_id) as liked_by_user";
+        } else {
+            $sql .= ",
+                    0 as liked_by_user";
+        }
+        
+        $sql .= " FROM {$this->table} i
                 INNER JOIN users u ON i.user_id = u.id
                 ORDER BY i.created_at DESC
                 LIMIT :limit OFFSET :offset";
@@ -94,6 +103,11 @@ class Image extends Model
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            
+            if ($userId) {
+                $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
+            }
+            
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {

@@ -137,7 +137,7 @@
             flex: 1;
             max-width: 900px;
             width: 100%;
-            margin: 10px auto;
+            margin: 0 auto;
         }
         
         .footer-container {

@@ -136,8 +136,11 @@ class ImageController extends Controller
         $limit = max(1, min($limit, 50)); // Between 1 and 50
         $offset = max(0, $offset);
 
+        $currentUser = AuthMiddleware::user();
+        $userId = $currentUser ? $currentUser['id'] : null;
+
         $imageModel = new Image();
-        $images = $imageModel->findAllWithUsersPaginated($limit, $offset);
+        $images = $imageModel->findAllWithUsersPaginated($limit, $offset, $userId);
 
         echo json_encode([
             'success' => true,
