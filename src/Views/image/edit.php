@@ -8,15 +8,12 @@
     }
 
     .main-section {
-        background: #f8f9fa;
-        padding: 2rem;
-        border-radius: 8px;
+        padding: 1rem 0;
     }
 
     .webcam-area {
         background: white;
         border: 2px solid #dee2e6;
-        border-radius: 8px;
         padding: 2rem;
         margin-bottom: 2rem;
         display: flex;
@@ -32,7 +29,6 @@
     #video-stream {
         width: 100%;
         max-width: 600px;
-        border-radius: 8px;
         background: #000;
         margin-bottom: 1rem;
     }
@@ -50,7 +46,6 @@
         color: white;
         padding: 0.75rem 2rem;
         border: none;
-        border-radius: 4px;
         cursor: pointer;
         font-size: 1rem;
         transition: background 0.3s;
@@ -72,7 +67,6 @@
         color: white;
         padding: 0.75rem 2rem;
         border: none;
-        border-radius: 4px;
         cursor: pointer;
         font-size: 0.9rem;
         transition: background 0.3s;
@@ -87,7 +81,6 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
         padding: 1rem;
-        border-radius: 4px;
         margin-bottom: 1rem;
         text-align: center;
     }
@@ -95,7 +88,6 @@
     .upload-area {
         background: white;
         border: 2px dashed #dee2e6;
-        border-radius: 8px;
         padding: 3rem;
         text-align: center;
         margin-bottom: 2rem;
@@ -132,7 +124,6 @@
         color: white;
         padding: 0.75rem 2rem;
         border: none;
-        border-radius: 4px;
         cursor: pointer;
         font-size: 1rem;
         transition: background 0.3s;
@@ -161,7 +152,6 @@
         position: relative;
         cursor: pointer;
         border: 3px solid transparent;
-        border-radius: 8px;
         padding: 0.5rem;
         background: white;
         transition: all 0.3s;
@@ -186,7 +176,6 @@
         width: 60px;
         height: 60px;
         background: #f8f9fa;
-        border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -203,7 +192,6 @@
         color: white;
         padding: 1rem 2rem;
         border: none;
-        border-radius: 4px;
         cursor: pointer;
         font-size: 1.1rem;
         font-weight: bold;
@@ -224,7 +212,6 @@
     .sidebar {
         background: #f8f9fa;
         padding: 1.5rem;
-        border-radius: 8px;
     }
 
     .sidebar h3 {
@@ -240,7 +227,6 @@
     .thumbnail-item {
         position: relative;
         background: white;
-        border-radius: 4px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
@@ -259,7 +245,6 @@
         color: white;
         border: none;
         padding: 0.25rem 0.5rem;
-        border-radius: 4px;
         cursor: pointer;
         font-size: 0.75rem;
         transition: background 0.3s;
@@ -278,7 +263,6 @@
     .alert {
         padding: 1rem;
         margin-bottom: 1rem;
-        border-radius: 4px;
     }
 
     .alert-error {
@@ -321,7 +305,6 @@
 
 <div class="edit-container">
     <div class="main-section">
-        <h2>Create Your Image</h2>
 
         <div id="alert-container"></div>
 

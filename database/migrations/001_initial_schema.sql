@@ -85,4 +85,7 @@ INSERT INTO superposable_images (name, filename) VALUES
 ('Mustache', 'mustache.png'),
 ('Crown', 'crown.png'),
 ('Heart Frame', 'heart-frame.png'),
-('Star Effect', 'star-effect.png');
+('Star Effect', 'star-effect.png'),
+('Wig', 'wig.png'),
+('South Park Hat', 'south-park-hat.png'),
+('Kanye Glasses', 'kanye.png');

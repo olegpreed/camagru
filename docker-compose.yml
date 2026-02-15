@@ -40,6 +40,7 @@ services:
       - MYSQL_PASSWORD=${DB_PASS}
     volumes:
       - db_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
     networks:
       - camagru_network
 
