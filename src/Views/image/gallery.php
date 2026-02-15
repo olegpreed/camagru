@@ -328,6 +328,10 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
+		.comments-list {
+			max-height: 200px;
+		}
+
         .gallery-item-wrapper {
             aspect-ratio: auto;
         }
@@ -449,7 +453,7 @@
         }
     }
 
-    async function addComment(imageId, content, textarea, remainingSpan, commentsContainer, likeBtn, commentCountSpan) {
+    async function addComment(imageId, content, textarea, remainingSpan, commentsContainer, commentCountSpan) {
         if (!isLoggedIn || !content.trim()) return;
 
         try {
@@ -644,7 +648,7 @@
         });
 
         submitBtn.addEventListener('click', () => {
-            addComment(image.id, textarea.value, textarea, remaining, commentsList, likeBtn);
+            addComment(image.id, textarea.value, textarea, remaining, commentsList);
         });
 
         let loginHint = null;
