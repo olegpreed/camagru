@@ -186,25 +186,21 @@
                 overflow-y: visible;
             }
             
-            .header-top {
+            /* .header-top {
                 flex-direction: column;
                 gap: 10px;
                 text-align: center;
-            }
+            } */
             
-            .header-nav {
+            /* .header-nav {
                 flex-direction: column;
                 padding: 0;
-            }
+            } */
             
             .nav-tab {
-                border: 1px solid #c084b1;
-                border-bottom: none;
-            }
-            
-            .nav-tab:last-child {
-                border-bottom: 1px solid #c084b1;
-            }
+                border-left: 1px solid #000000;
+				border-right: 1px solid #000000;
+			}
             
             main {
                 margin: 10px auto;

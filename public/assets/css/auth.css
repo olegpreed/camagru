@@ -134,6 +134,7 @@
 @media (max-width: 768px) {
   .auth-container {
     flex-direction: column;
+    align-items: center;
     gap: 2rem;
   }
 
