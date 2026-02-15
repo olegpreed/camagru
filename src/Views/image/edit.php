@@ -252,6 +252,64 @@
         display: block;
     }
 
+    /* Confirmation Modal */
+    .confirm-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .confirm-modal.show {
+        display: flex;
+    }
+
+    .confirm-modal-content {
+        background: white;
+        padding: 2rem;
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .confirm-modal-message {
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .confirm-modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .confirm-modal-buttons button {
+        padding: 0.5rem 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .confirm-modal-buttons .btn-cancel {
+        background: #e0e0e0;
+    }
+
+    .confirm-modal-buttons .btn-confirm {
+        background: #ff4444;
+        color: white;
+    }
+
+    .confirm-modal-buttons .btn-confirm:hover {
+        background: #cc0000;
+    }
+
     @media (max-width: 768px) {
         .edit-container {
             grid-template-columns: 1fr;
@@ -349,6 +407,17 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div class="confirm-modal" id="confirm-modal">
+    <div class="confirm-modal-content">
+        <div class="confirm-modal-message" id="confirm-modal-message"></div>
+        <div class="confirm-modal-buttons">
+            <button type="button" class="btn-cancel" id="confirm-cancel">Cancel</button>
+            <button type="button" class="btn-confirm" id="confirm-ok">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const uploadArea = document.getElementById('upload-area');
     const imageUpload = document.getElementById('image-upload');
@@ -362,6 +431,12 @@
     const canvasContainer = document.getElementById('canvas-container');
     const canvas = document.getElementById('preview-canvas');
     const ctx = canvas.getContext('2d');
+
+    // Confirmation modal elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmMessage = document.getElementById('confirm-modal-message');
+    const confirmOkBtn = document.getElementById('confirm-ok');
+    const confirmCancelBtn = document.getElementById('confirm-cancel');
 
     // Webcam elements
     const webcamArea = document.getElementById('webcam-area');
@@ -1079,7 +1154,8 @@
 
     // Delete image
     async function deleteImage(imageId) {
-        if (!confirm('Are you sure you want to delete this image?')) {
+        const confirmed = await showConfirm('Are you sure you want to delete this image?');
+        if (!confirmed) {
             return;
         }
 
@@ -1128,6 +1204,33 @@
         setTimeout(() => {
             alertContainer.innerHTML = '';
         }, 5000);
+    }
+
+    // Show confirmation modal
+    function showConfirm(message) {
+        return new Promise((resolve) => {
+            confirmMessage.textContent = message;
+            confirmModal.classList.add('show');
+
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const cleanup = () => {
+                confirmModal.classList.remove('show');
+                confirmOkBtn.removeEventListener('click', handleOk);
+                confirmCancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            confirmOkBtn.addEventListener('click', handleOk);
+            confirmCancelBtn.addEventListener('click', handleCancel);
+        });
     }
 
     // Load user images on page load
