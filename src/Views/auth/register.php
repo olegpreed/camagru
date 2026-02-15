@@ -19,6 +19,7 @@
                     id="username" 
                     name="username" 
                     value="<?= htmlspecialchars($old['username'] ?? '') ?>"
+                    autocomplete="username"
                     required
                 >
                 <?php if (isset($errors['username'])): ?>
@@ -35,6 +36,7 @@
                     id="email" 
                     name="email" 
                     value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                    autocomplete="email"
                     required
                 >
                 <?php if (isset($errors['email'])): ?>
@@ -50,6 +52,7 @@
                     type="password" 
                     id="password" 
                     name="password" 
+                    autocomplete="new-password"
                     required
                 >
                 <?php if (isset($errors['password'])): ?>
@@ -68,6 +71,7 @@
                     type="password" 
                     id="password_confirm" 
                     name="password_confirm" 
+                    autocomplete="new-password"
                     required
                 >
                 <?php if (isset($errors['password_confirm'])): ?>

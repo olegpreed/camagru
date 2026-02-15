@@ -19,6 +19,7 @@
                     id="login"
                     name="login"
                     value="<?= htmlspecialchars($old['login'] ?? '') ?>"
+                    autocomplete="username"
                     required
                 >
                 <?php if (!empty($errors['login'])): ?>
@@ -34,6 +35,7 @@
                     type="password"
                     id="password"
                     name="password"
+                    autocomplete="current-password"
                     required
                 >
                 <?php if (!empty($errors['password'])): ?>

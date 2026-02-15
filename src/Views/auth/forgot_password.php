@@ -25,6 +25,7 @@
                     id="email" 
                     name="email" 
                     value="<?php echo htmlspecialchars($old['email'] ?? ''); ?>" 
+                    autocomplete="email"
                     required
                     autofocus
                 >

@@ -25,6 +25,7 @@
                     type="password" 
                     id="password" 
                     name="password" 
+                    autocomplete="new-password"
                     required
                     autofocus
                 >
@@ -42,6 +43,7 @@
                     type="password" 
                     id="password_confirm" 
                     name="password_confirm" 
+                    autocomplete="new-password"
                     required
                 >
                 <?php if (!empty($errors['password_confirm'])): ?>

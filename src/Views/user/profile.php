@@ -43,6 +43,7 @@
                                 id="username" 
                                 name="username" 
                                 value="<?php echo htmlspecialchars($old['username'] ?? $user['username']); ?>" 
+                                autocomplete="username"
                                 required
                             >
                             <?php if (!empty($errors['username'])): ?>
@@ -58,6 +59,7 @@
                                 id="email" 
                                 name="email" 
                                 value="<?php echo htmlspecialchars($old['email'] ?? $user['email']); ?>" 
+                                autocomplete="email"
                                 required
                             >
                             <?php if (!empty($errors['email'])): ?>

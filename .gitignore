@@ -24,3 +24,9 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+
+#testing
+START_HERE.md
+TESTING_CHECKLIST.md
+TESTING_GUIDE.md
+check-errors.sh
