@@ -89,30 +89,27 @@
         flex-direction: column;
         gap: 1rem;
 		min-height: 0;
+		background: linear-gradient(90deg, transparent, rgba(208, 224, 255, 0.53) 80%);
     }
 
     .gallery-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eee;
     }
 
     .gallery-user-info {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
     }
 
     .gallery-username {
         font-weight: bold;
-        color: #2c3e50;
+        color: #004fc5;
     }
 
     .gallery-date {
-        color: #7f8c8d;
-        font-size: 0.875rem;
+        color: #bfbfbf;
     }
 
     .gallery-actions {
@@ -172,7 +169,6 @@
     .comments-section {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
         flex: 1;
         min-height: 0;
     }
@@ -187,35 +183,16 @@
 		min-height: 0;
     }
 
-    .comments-list::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .comments-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-
-    .comments-list::-webkit-scrollbar-thumb {
-        background: #bbb;
-        border-radius: 3px;
-    }
-
-    .comments-list::-webkit-scrollbar-thumb:hover {
-        background: #999;
-    }
-
     .comment-item {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
-        padding: 0.5rem 0;
+        /* padding: 0.5rem 0; */
     }
 
     .comment-header {
         font-weight: 600;
-        color: #2c3e50;
-        font-size: 0.9rem;
+        color: #959595;
     }
 
     .comment-date {
@@ -525,18 +502,18 @@
 
             const headerDiv = document.createElement('div');
             headerDiv.className = 'comment-header';
-            headerDiv.textContent = comment.username;
+            headerDiv.textContent = comment.username + ':';
 
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'comment-date';
-            dateDiv.textContent = formattedDate;
+            // const dateDiv = document.createElement('div');
+            // dateDiv.className = 'comment-date';
+            // dateDiv.textContent = formattedDate;
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'comment-content';
             contentDiv.textContent = comment.content;
 
             commentItem.appendChild(headerDiv);
-            commentItem.appendChild(dateDiv);
+            // commentItem.appendChild(dateDiv);
             commentItem.appendChild(contentDiv);
 
             container.appendChild(commentItem);
@@ -611,7 +588,10 @@
         const formattedDate = date.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
-            year: 'numeric'
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
         });
 
         const dateDiv = document.createElement('div');
