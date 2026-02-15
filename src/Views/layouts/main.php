@@ -242,11 +242,11 @@
                 <a href="/" class="site-logo">WebSnap.com</a>
                 <div class="user-actions">
                     <?php if ($user): ?>
-                        <span class="username"><?= htmlspecialchars($user['username']) ?></span>
+                        <span class="username">[<?= htmlspecialchars($user['username']) ?>]</span>
                         <span>|</span>
                         <form method="POST" action="/auth/logout" style="display: inline; margin: 0;">
                             <?= \Core\CSRF::field() ?>
-                            <button type="submit" class="logout-btn">Logout ➜</button>
+                            <button type="submit" class="logout-btn">Logout →</button>
                         </form>
                     <?php else: ?>
                         <a href="/auth/login">Login</a>

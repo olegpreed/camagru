@@ -5,10 +5,19 @@
         gap: 2rem;
         max-width: 900px;
         margin: 0 auto;
+        height: 100%;
+        overflow: hidden;
     }
 
     .main-section {
         padding: 1rem 0;
+        overflow-y: auto;
+        min-height: 0;
+        direction: rtl;
+    }
+    
+    .main-section > * {
+        direction: ltr;
     }
 
     .webcam-area {
@@ -109,9 +118,11 @@
     }
 
     .overlays-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        display: flex;
         gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 0.5rem;
     }
 
     .overlay-item {
@@ -120,6 +131,8 @@
         border: 3px solid transparent;
         padding: 0.5rem;
         text-align: center;
+        flex-shrink: 0;
+        min-width: 80px;
     }
 
     .overlay-item:hover {
@@ -162,9 +175,9 @@
     }
 
     .sidebar {
-        background: #f8f9fa;
-        padding: 1.5rem;
+        padding: 1rem;
 		overflow-y: auto;
+        min-height: 0;
     }
 
     .sidebar h3 {
@@ -201,10 +214,6 @@
         transition: background 0.3s;
     }
 
-    .delete-btn:hover {
-        background: #c82333;
-    }
-
     .empty-state {
         text-align: center;
         color: #6c757d;
@@ -212,8 +221,6 @@
     }
 
     .alert {
-        padding: 1rem;
-        margin-bottom: 1rem;
     }
 
     .alert-error {
@@ -246,6 +253,13 @@
     @media (max-width: 768px) {
         .edit-container {
             grid-template-columns: 1fr;
+            height: auto;
+            overflow: visible;
+        }
+        
+        .main-section,
+        .sidebar {
+            overflow-y: visible;
         }
     }
 </style>
@@ -289,7 +303,6 @@
 
         <!-- Canvas Preview -->
         <div id="canvas-container" style="display: none; margin-bottom: 2rem;">
-            <h3>Preview</h3>
             <canvas id="preview-canvas" style="border: 1px solid #ddd; max-width: 100%; display: block; margin-bottom: 1rem;"></canvas>
             <p style="color: #6c757d; font-size: 0.9rem;">Drag the overlay to position it</p>
         </div>
@@ -327,7 +340,6 @@
 
     <!-- Sidebar with User's Images -->
     <div class="sidebar">
-        <h3>Your Images</h3>
         <div class="thumbnails-grid" id="thumbnails-grid">
             <div class="empty-state">Loading...</div>
         </div>
