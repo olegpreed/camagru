@@ -406,7 +406,7 @@
             camerPermissionError.style.display = 'none';
             useWebcam = true;
         } catch (error) {
-            console.error('Camera access denied or unavailable:', error);
+            // Camera access denied - show error message and fallback to upload
             camerPermissionError.style.display = 'block';
             requestingCamera.style.display = 'none';
             videoStream.style.display = 'none';
@@ -478,7 +478,11 @@
         canvasContainer.style.display = 'none';
         
         // Initialize webcam again
-        await initializeWebcam();
+        try {
+            await initializeWebcam();
+        } catch (error) {
+            // Error already handled in initializeWebcam
+        }
     }
 
     // Event listeners for webcam controls
@@ -925,11 +929,6 @@
 
     // Capture/Create image
     captureBtn.addEventListener('click', async () => {
-        console.log('Capture button clicked');
-        console.log('Selected file:', selectedFile);
-        console.log('Selected overlay ID:', selectedOverlayId);
-        console.log('Overlay position:', overlayX, overlayY);
-        
         if (!selectedFile || !selectedOverlayId) {
             showAlert('Please select both an image and an overlay', 'error');
             return;
@@ -941,14 +940,12 @@
 
         try {
             // Get fresh CSRF token
-            console.log('Fetching CSRF token...');
             const tokenResponse = await fetch('/image/getCsrfToken');
             if (!tokenResponse.ok) {
                 throw new Error('Failed to get CSRF token');
             }
             const tokenData = await tokenResponse.json();
             const csrfToken = tokenData.csrf_token;
-            console.log('CSRF token retrieved');
 
             // Prepare form data
             const formData = new FormData();
@@ -960,28 +957,19 @@
             formData.append('overlay_height', Math.round(overlayHeight));
             formData.append('csrf_token', csrfToken);
 
-            console.log('Form data prepared');
-            console.log('Sending request to /image/compose');
-
             const response = await fetch('/image/compose', {
                 method: 'POST',
                 body: formData
             });
             
-            console.log('Response received:', response.status, response.statusText);
-            
             if (!response.ok) {
-                const text = await response.text();
-                console.error('Response text:', text);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const text = await response.text();
-            console.log('Response text:', text);
             
             try {
                 const data = JSON.parse(text);
-                console.log('Response data:', data);
 
                 if (data.success) {
                     showAlert('Image created successfully!', 'success');
@@ -991,9 +979,7 @@
                     showAlert(data.error || 'Failed to create image', 'error');
                 }
             } catch (parseError) {
-                console.error('JSON parse error:', parseError);
-                console.error('Response was:', text);
-                showAlert('Server error: ' + parseError.message, 'error');
+                showAlert('Server error: Invalid response from server', 'error');
             }
         } finally {
             loading.classList.remove('show');
@@ -1028,7 +1014,11 @@
             webcamArea.classList.remove('hidden');
             // Reinitialize webcam if stopped
             if (!mediaStream) {
-                await initializeWebcam();
+                try {
+                    await initializeWebcam();
+                } catch (error) {
+                    // Error already handled in initializeWebcam
+                }
             }
         } else {
             uploadArea.classList.remove('hidden');
@@ -1079,7 +1069,6 @@
                 thumbnailsGrid.appendChild(emptyDiv);
             }
         } catch (error) {
-            console.error('Failed to load images:', error);
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'empty-state';
             emptyDiv.textContent = 'Failed to load images';
@@ -1120,8 +1109,7 @@
                 showAlert(data.error || 'Failed to delete image', 'error');
             }
         } catch (error) {
-            showAlert('An error occurred: ' + error.message, 'error');
-            console.error('Delete image error:', error);
+            showAlert('An error occurred while deleting image', 'error');
         }
     }
 
@@ -1146,5 +1134,7 @@
     loadUserImages();
     
     // Initialize webcam on page load
-    initializeWebcam();
+    initializeWebcam().catch(() => {
+        // Error already handled in initializeWebcam
+    });
 </script>
