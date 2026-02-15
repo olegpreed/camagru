@@ -3,7 +3,7 @@
         display: grid;
         grid-template-columns: 1fr 300px;
         gap: 2rem;
-        max-width: 1400px;
+        max-width: 900px;
         margin: 0 auto;
     }
 
@@ -13,7 +13,7 @@
 
     .webcam-area {
         background: white;
-        border: 2px solid #dee2e6;
+        border: 1px solid #000000;
         padding: 2rem;
         margin-bottom: 2rem;
         display: flex;
@@ -29,7 +29,7 @@
     #video-stream {
         width: 100%;
         max-width: 600px;
-        background: #000;
+        /* background: #000; */
         margin-bottom: 1rem;
     }
 
@@ -42,44 +42,20 @@
     }
 
     .capture-photo-btn {
-        background: #28a745;
-        color: white;
         padding: 0.75rem 2rem;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background 0.3s;
-        font-weight: bold;
-    }
-
-    .capture-photo-btn:hover:not(:disabled) {
-        background: #218838;
+		font-weight: bold;
     }
 
     .capture-photo-btn:disabled {
-        background: #6c757d;
         cursor: not-allowed;
-        opacity: 0.6;
     }
 
     .toggle-upload-btn {
-        background: #6c757d;
-        color: white;
         padding: 0.75rem 2rem;
-        border: none;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.3s;
-    }
-
-    .toggle-upload-btn:hover {
-        background: #5a6268;
     }
 
     .camera-permission-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        color: #ff1a31;
         padding: 1rem;
         margin-bottom: 1rem;
         text-align: center;
@@ -87,7 +63,7 @@
 
     .upload-area {
         background: white;
-        border: 2px dashed #dee2e6;
+        border: 1px dashed black;
         padding: 3rem;
         text-align: center;
         margin-bottom: 2rem;
@@ -120,17 +96,7 @@
     }
 
     .upload-btn {
-        background: #007bff;
-        color: white;
-        padding: 0.75rem 2rem;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background 0.3s;
-    }
-
-    .upload-btn:hover {
-        background: #0056b3;
+		padding: 0.75rem 2rem;
     }
 
     .overlays-section {
@@ -153,19 +119,15 @@
         cursor: pointer;
         border: 3px solid transparent;
         padding: 0.5rem;
-        background: white;
-        transition: all 0.3s;
         text-align: center;
     }
 
     .overlay-item:hover {
-        transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .overlay-item.selected {
-        border-color: #28a745;
-        background: #e8f5e9;
+        border: 2px solid #2add54;
     }
 
     .overlay-item input[type="radio"] {
@@ -175,7 +137,7 @@
     .overlay-preview {
         width: 60px;
         height: 60px;
-        background: #f8f9fa;
+        /* background: #f8f9fa; */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -188,30 +150,21 @@
     }
 
     .capture-btn {
-        background: #28a745;
-        color: white;
         padding: 1rem 2rem;
-        border: none;
-        cursor: pointer;
         font-size: 1.1rem;
         font-weight: bold;
         width: 100%;
-        transition: background 0.3s;
     }
 
     .capture-btn:disabled {
-        background: #6c757d;
         cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .capture-btn:not(:disabled):hover {
-        background: #218838;
+        /* opacity: 0.6; */
     }
 
     .sidebar {
         background: #f8f9fa;
         padding: 1.5rem;
+		overflow-y: auto;
     }
 
     .sidebar h3 {
@@ -241,8 +194,6 @@
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
-        background: #dc3545;
-        color: white;
         border: none;
         padding: 0.25rem 0.5rem;
         cursor: pointer;
@@ -266,15 +217,11 @@
     }
 
     .alert-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        color: #ff142b;
     }
 
     .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        color: #14a035;
     }
 
     #preview-canvas {
@@ -319,7 +266,7 @@
                     📸 Capture Photo
                 </button>
                 <button type="button" class="toggle-upload-btn" id="toggle-to-upload-btn">
-                    📁 Upload Image Instead
+                    📁 Upload Image
                 </button>
             </div>
             <p id="requesting-camera" style="text-align: center; color: #666;">Requesting camera access...</p>
@@ -329,13 +276,12 @@
         <div class="upload-area hidden" id="upload-area">
             <img id="preview-image" alt="Preview">
             <div id="upload-prompt">
-                <p style="font-size: 3rem; margin-bottom: 1rem;">📷</p>
                 <p style="margin-bottom: 1rem;">Drag & drop an image here, or click to select</p>
                 <button type="button" class="upload-btn" onclick="document.getElementById('image-upload').click()">
                     Choose Image
                 </button>
-                <button type="button" class="upload-btn" id="toggle-to-webcam-btn" style="background: #6c757d; margin-top: 1rem;">
-                    🎥 Use Webcam Instead
+                <button type="button" class="upload-btn" id="toggle-to-webcam-btn">
+                    🎥 Use Webcam
                 </button>
             </div>
             <input type="file" id="image-upload" class="upload-input" accept="image/jpeg,image/jpg,image/png,image/gif">
@@ -350,7 +296,6 @@
 
         <!-- Overlays Selection -->
         <div class="overlays-section">
-            <h3>Select an Overlay</h3>
             <div class="overlays-grid" id="overlays-grid">
                 <?php if (empty($superposableImages)): ?>
                     <p class="empty-state">No overlays available. Please add overlay images to /public/assets/overlays/</p>
@@ -364,7 +309,6 @@
                                      style="max-width: 100%; max-height: 100%;"
                                      onerror="this.style.display='none'; this.parentElement.innerHTML='<span>📄</span>'">
                             </div>
-                            <div class="overlay-name"><?= htmlspecialchars($overlay['name']) ?></div>
                         </label>
                     <?php endforeach; ?>
                 <?php endif; ?>

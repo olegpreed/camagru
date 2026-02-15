@@ -24,16 +24,18 @@
 				'/assets/images/body_bg.png');
 			background-size: cover;
             background-attachment: fixed;
-            min-height: 100vh;
+            height: 100vh;
 			font-size: 13px;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         
         /* Header Container */
         header {
             display: flex;
             justify-content: center;
+            flex-shrink: 0;
         }
         
         .header-container {
@@ -140,6 +142,8 @@
             width: 100%;
             margin: 0 auto;
 			padding-top: 10px;
+            overflow-y: auto;
+            min-height: 0;
         }
         
         .footer-container {
@@ -148,6 +152,10 @@
             margin: 0 auto;
             padding: 15px 20px;
             text-align: center;
+        }
+        
+        footer {
+            flex-shrink: 0;
         }
         
         .footer-badges {
@@ -168,6 +176,16 @@
         
         /* Responsive Design */
         @media (max-width: 768px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+            }
+            
+            main {
+                overflow-y: visible;
+            }
+            
             .header-top {
                 flex-direction: column;
                 gap: 10px;
