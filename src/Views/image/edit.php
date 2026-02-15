@@ -110,6 +110,7 @@
 
     .overlays-section {
         margin-bottom: 2rem;
+        min-width: 0;
     }
 
     .overlays-section h3 {
@@ -123,6 +124,7 @@
         overflow-x: auto;
         overflow-y: hidden;
         padding-bottom: 0.5rem;
+        min-width: 0;
     }
 
     .overlay-item {
@@ -260,6 +262,7 @@
         .main-section,
         .sidebar {
             overflow-y: visible;
+            overflow-x: hidden;
         }
     }
 </style>
