@@ -1,7 +1,5 @@
 # Camagru - Web Application Project
 
-## Phase 1: Docker Setup
-
 ### Prerequisites
 - Docker Desktop installed
 - Docker Compose installed
@@ -25,7 +23,3 @@
 - ✅ Docker Compose setup
 - ✅ PHP 8.2 with Apache
 - ✅ MySQL 8.0
-- ✅ Basic project structure
-
-### Next Phase
-Phase 2: Database Design & Setup
