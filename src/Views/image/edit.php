@@ -240,6 +240,9 @@
         margin-bottom: 1rem;
         cursor: grab;
         background: white;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     .loading {
@@ -460,7 +463,7 @@
     let isResizing = false;
     let dragStartX = 0;
     let dragStartY = 0;
-    const resizeHandleSize = 12;
+    const resizeHandleSize = 24;
     
     // Webcam state
     let mediaStream = null;
@@ -823,15 +826,40 @@
         });
     }
 
-    // Canvas mouse events for dragging overlay
-    canvas.addEventListener('mousedown', (e) => {
-        if (!selectedOverlayImage) return;
-
+    // Helper function to get canvas coordinates from mouse or touch event
+    function getCanvasCoords(e) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        
+        let clientX, clientY;
+        
+        if (e.touches) {
+            // Touch event
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            // Mouse event
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    // Canvas mouse and touch events for dragging overlay
+    canvas.addEventListener('mousedown', handleCanvasDown);
+    canvas.addEventListener('touchstart', handleCanvasDown);
+
+    function handleCanvasDown(e) {
+        if (!selectedOverlayImage) return;
+
+        const coords = getCanvasCoords(e);
+        const x = coords.x;
+        const y = coords.y;
 
         // Check if clicking on resize handle
         const handleX = overlayX + overlayWidth - resizeHandleSize;
@@ -864,14 +892,15 @@
             canvas.style.cursor = 'grabbing';
             e.preventDefault();
         }
-    });
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+    canvas.addEventListener('mousemove', handleCanvasMove);
+    canvas.addEventListener('touchmove', handleCanvasMove);
+
+    function handleCanvasMove(e) {
+        const coords = getCanvasCoords(e);
+        const x = coords.x;
+        const y = coords.y;
 
         if (isResizing) {
             // Handle resizing
@@ -942,9 +971,12 @@
                 canvas.style.cursor = 'default';
             }
         }
-    });
+    }
 
-    document.addEventListener('mouseup', (e) => {
+    document.addEventListener('mouseup', handleCanvasUp);
+    document.addEventListener('touchend', handleCanvasUp);
+
+    function handleCanvasUp(e) {
         if (isDragging || isResizing) {
             isDragging = false;
             isResizing = false;
@@ -955,7 +987,7 @@
             }
             e.preventDefault();
         }
-    });
+    }
 
     canvas.addEventListener('mouseleave', (e) => {
         if (!isDragging && selectedOverlayImage) {
