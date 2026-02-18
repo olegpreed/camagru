@@ -10,6 +10,7 @@
    cp .env.example .env
    2. Build and start containers:
   
+   <!-- docker compose down -v --rmi all -->
    docker-compose up -d --build
    3. Access the application:
    - Open browser: http://localhost:8080

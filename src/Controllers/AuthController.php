@@ -17,7 +17,7 @@ class AuthController extends Controller
 {
     protected function before(): bool
     {
-        $guestOnlyActions = ['login', 'register', 'registerPost', 'verify'];
+        $guestOnlyActions = ['login', 'register', 'registerPost'];
         $action = $this->routeParams['action'] ?? '';
 
         if (in_array($action, $guestOnlyActions, true)) {
