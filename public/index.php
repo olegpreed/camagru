@@ -38,6 +38,7 @@ $router->add('user/profile', ['controller' => 'User', 'action' => 'profile']);
 $router->add('user/edit-profile', ['controller' => 'User', 'action' => 'editProfile']);
 $router->add('user/change-password', ['controller' => 'User', 'action' => 'changePassword']);
 $router->add('user/reset-password', ['controller' => 'User', 'action' => 'resetPassword']);
+$router->add('user/verify-email-change', ['controller' => 'User', 'action' => 'verifyEmailChange']);
 
 // Image routes
 $router->add('image/edit', ['controller' => 'Image', 'action' => 'edit']);
@@ -62,17 +63,17 @@ $url = ltrim($url, '/');
 
 // Empty string for root
 if ($url === '') {
-    $url = '';
+	$url = '';
 }
 
 // Dispatch the route
 try {
-    $router->dispatch($url);
+	$router->dispatch($url);
 } catch (\Exception $e) {
-    http_response_code(404);
-    echo "<h1>404 - Page Not Found</h1>";
-    echo "<p>" . htmlspecialchars($e->getMessage()) . "</p>";
-    if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'development') {
-        echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-    }
+	http_response_code(404);
+	echo "<h1>404 - Page Not Found</h1>";
+	echo "<p>" . htmlspecialchars($e->getMessage()) . "</p>";
+	if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'development') {
+		echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+	}
 }

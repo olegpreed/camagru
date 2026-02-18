@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
     verification_token VARCHAR(255) DEFAULT NULL,
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_token_expires_at DATETIME DEFAULT NULL,
+    pending_email VARCHAR(255) DEFAULT NULL,
+    pending_email_token VARCHAR(255) DEFAULT NULL,
+    pending_email_token_expires_at DATETIME DEFAULT NULL,
     comment_notifications TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
