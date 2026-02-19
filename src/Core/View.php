@@ -42,18 +42,4 @@ class View
             throw new \Exception("Layout file not found: $layoutFile");
         }
     }
-
-    /**
-     * Render a view without layout (for AJAX responses, etc.)
-     */
-    public static function renderPartial(string $view, array $data = []): void
-    {
-        extract($data);
-        $viewFile = __DIR__ . '/../Views/' . str_replace('.', '/', $view) . '.php';
-        if (file_exists($viewFile)) {
-            require $viewFile;
-        } else {
-            throw new \Exception("View file not found: $viewFile");
-        }
-    }
 }
