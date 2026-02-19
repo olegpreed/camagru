@@ -408,8 +408,18 @@ class ImageController extends Controller
 
             // Validate base image upload
             if ($baseImageFile['error'] !== UPLOAD_ERR_OK) {
+                $uploadErrors = [
+                    UPLOAD_ERR_INI_SIZE => 'File is too large (exceeds server limit)',
+                    UPLOAD_ERR_FORM_SIZE => 'File is too large (exceeds form limit)',
+                    UPLOAD_ERR_PARTIAL => 'File upload was interrupted',
+                    UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Server configuration error: no temp directory',
+                    UPLOAD_ERR_CANT_WRITE => 'Server configuration error: cannot write to disk',
+                    UPLOAD_ERR_EXTENSION => 'Upload blocked by server extension'
+                ];
+                $errorMessage = $uploadErrors[$baseImageFile['error']] ?? 'Unknown upload error';
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Image upload failed']);
+                echo json_encode(['success' => false, 'error' => $errorMessage]);
                 return;
             }
 
