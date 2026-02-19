@@ -44,56 +44,19 @@ class Router
 	 */
 	public function dispatch(string $url): void
 	{
-		// Remove query string
-		$url = $this->removeQueryStringVariables($url);
-
 		if ($this->match($url)) {
 			$controller = $this->params['controller'] ?? 'Home';
-			$controller = $this->getNamespace() . $controller . 'Controller';
+			$controller = 'Controllers\\' . $controller . 'Controller';
 
 			if (class_exists($controller)) {
 				$controllerObject = new $controller($this->params);
 				$action = $this->params['action'] ?? 'index';
-
-				if (preg_match('/action$/i', $action) == 0) {
-					// Call the method - Controller's __call will handle adding 'Action' suffix
-					$controllerObject->$action();
-				} else {
-					throw new \Exception("Method $action cannot be called directly");
-				}
+				$controllerObject->$action();
 			} else {
 				throw new \Exception("Controller class $controller not found");
 			}
 		} else {
 			throw new \Exception("No route matched for URL: $url", 404);
 		}
-	}
-
-	/**
-	 * Remove query string variables from URL
-	 */
-	private function removeQueryStringVariables(string $url): string
-	{
-		if ($url != '') {
-			$parts = explode('&', $url, 2);
-			if (strpos($parts[0], '=') === false) {
-				$url = $parts[0];
-			} else {
-				$url = '';
-			}
-		}
-		return $url;
-	}
-
-	/**
-	 * Get the namespace for the controller class
-	 */
-	private function getNamespace(): string
-	{
-		$namespace = 'Controllers\\';
-		if (array_key_exists('namespace', $this->params)) {
-			$namespace .= $this->params['namespace'] . '\\';
-		}
-		return $namespace;
 	}
 }
